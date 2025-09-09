@@ -86,12 +86,13 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 				tc = new TestCase();
 				tc.insertTestCaseId(tmp);
 			}
-			
+			if(actionCell!=null) {
 			String action = actionCell.getStringCellValue();
+			ts.insertAction(action);}
 			Optional<String> locator = Optional.ofNullable(locatorCell).map(Cell::toString);
 			Optional<String> testData = Optional.ofNullable(testDataCell).map(Cell::toString);
 			
-			ts.insertAction(action);
+			
 			ts.insertLocator(locator);
 			ts.insertTestData(testData);
 			ts.setStepNumber(stepNumber);
