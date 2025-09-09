@@ -11,12 +11,17 @@ public class TestSuite {
 	
 	String suiteName;
 	List<TestCase> testSuite;
+	boolean isTestSuiteValid;
 	
 	public TestSuite(List<TestCase> listOfTestCases) {
 		this.testSuite = listOfTestCases;
+		this.isTestSuiteValid = true;
+		
 	}
 	public TestSuite() {
 		this.testSuite = new ArrayList<TestCase>();
+		this.isTestSuiteValid = true;
+		
 	}
 	/**
      * adds one test case at a time to the test suite.
@@ -119,6 +124,25 @@ public class TestSuite {
 		boolean status = true;
 		status = getListOfTestCasesByStatus(TestStatus.PASSED).size() == this.testSuite.size() ? true : false;
 		return status;
+	}
+	
+	public boolean suiteContainsHooks() {
+		boolean result = true;
+		
+		result = this.getTestCasesById("beforeEach").size() > 0 || 
+				 this.getTestCasesById("afterEach").size() > 0 ||
+				 this.getTestCasesById("afterAll").size() > 0 ||
+				 this.getTestCasesById("beforeAll").size() > 0;
+				 
+		return result;
+	}
+	
+	public void setTestSuiteStatus(boolean status) {
+		this.isTestSuiteValid = status;
+	}
+	
+	public boolean isTestSuiteValid() {
+		return this.isTestSuiteValid;
 	}
 	
 	

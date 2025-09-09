@@ -48,6 +48,8 @@ public class TestStep {
 	public TestStatus getResult() {
 		return result;
 	}
-	
+	public String getTestStepReason() {
+		return this.reason;
+	}
 	
 }

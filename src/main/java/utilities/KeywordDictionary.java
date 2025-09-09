@@ -31,6 +31,7 @@ public class KeywordDictionary  {
 	public void triggerLazyLoadAndClick(String locatorData) throws InterruptedException {
 		browser.movePageToTackleLazyLoad();
 		browser.waitForPresenceOfElement(locatorData);
+		browser.checkVisibilityOfElement(locatorData);
 		Thread.sleep(250);
 		browser.clickWebElement(locatorData);
 	}
@@ -93,7 +94,10 @@ public class KeywordDictionary  {
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
 		String actualData = browser.getTextFromTextBox(locatorData);
-		if(!actualData.equals(expectedData)) {
+		if(expectedData.equalsIgnoreCase("null")) {
+			expectedData = "";
+		}
+		if(!actualData.equals(expectedData.trim())) {
 			throw new Exception("<< Expected and Actual Data don't match >>"+
 			"\nActual Data : "+ actualData +
 			"\nExpected Data : " + expectedData);
@@ -104,6 +108,9 @@ public class KeywordDictionary  {
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
 		String actualData = browser.getTextFromTextBox(locatorData);
+		if(expectedData.equalsIgnoreCase("null")) {
+			expectedData = "";
+		}
 		if(!actualData.equals(expectedData)) {
 			throw new SoftAssert("<< Expected and Actual Data don't match >>"+
 			"\nActual Data : "+ actualData +
@@ -115,9 +122,9 @@ public class KeywordDictionary  {
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
 		String actualData = browser.getTextFromElement(locatorData);
-		if(!actualData.equals(expectedData)) {
+		if(!actualData.trim().equals(expectedData.trim())) {
 			throw new Exception("<< Expected and Actual Data don't match >>"+
-								"\nActual Data : "+ actualData +
+								"\nActual Data   : "+ actualData +
 								"\nExpected Data : " + expectedData);
 		}
 	}
@@ -126,9 +133,9 @@ public class KeywordDictionary  {
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
 		String actualData = browser.getTextFromElement(locatorData);
-		if(!actualData.equals(expectedData)) {
+		if(!actualData.trim().equals(expectedData.trim())) {
 			throw new SoftAssert("<< Expected and Actual Data don't match >>"+
-								"\nActual Data : "+ actualData +
+								"\nActual Data   : "+ actualData +
 								"\nExpected Data : " + expectedData);
 		}
 	}

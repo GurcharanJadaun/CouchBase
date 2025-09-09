@@ -1,6 +1,7 @@
 package utilities;
 
 import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.util.Arrays;
 
 import com.microsoft.playwright.*;
@@ -148,13 +149,25 @@ public class BrowserKeeper {
 		 String text = "";
 		 Locator ele = page.locator(locator);
 		 text = ele.inputValue();
+		 try{
+			 text = text.trim();
+		 }catch(Exception ex) {
+			 text = "";
+		 }
 		 return text;
 	 }
 	 
 	 public String getTextFromElement(String locator) {
 		 String text = "";
 		 Locator ele = page.locator(locator);
-		 text = ele.innerText();
+		 text = ele.textContent();
+		 try{
+			 Normalizer.normalize(text, Normalizer.Form.NFC)
+             .replaceAll("[^\\p{ASCII}]", "");
+			 text = text.trim();
+		 }catch(Exception ex) {
+			 text = "";
+		 }
 		 return text;
 	 }
 	 

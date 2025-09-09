@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import TestReports.TestReports;
 import testManager.TestCase;
 import testManager.TestStatus;
 import testManager.TestStep;
@@ -19,16 +20,27 @@ public abstract class TestCaseCompiler {
 	
 	public void generateCompilationReport(TestSuite suite) {
 		
+		TestReports reports = new TestReports(suite);
+		reports.createCompilerReport();
+		
 		List<TestCase> shortListed = suite.removeInvalidTestCasesFromSuite();
+		boolean status = new TestSuite(shortListed).suiteContainsHooks();
+		suite.setTestSuiteStatus(!status);
+		
 		this.createReport(suite.getSuiteName(),shortListed);
 		
 	}
 	
 	public void generateCompilationReport(List <TestSuite> listOfSuites) {
 		
+		TestReports reports = new TestReports(listOfSuites);
+		reports.createCompilerReport();
+		
 		for(TestSuite suite : listOfSuites) {
 			List<TestCase> shortListed = Collections.emptyList();
 				shortListed = suite.removeInvalidTestCasesFromSuite();
+				boolean status = new TestSuite(shortListed).suiteContainsHooks();
+				suite.setTestSuiteStatus(!status);
 				this.createReport(suite.getSuiteName(),shortListed);
 			
 		}
