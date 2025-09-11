@@ -21,7 +21,7 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 
 	TestSuite beforeAllTests, beforeEachTest, afterAllTests, afterEachTest;
 	ExtentReports report;
-	ExtentTest caseNode, suiteNode, stepNode;
+	ExtentTest caseNode, suiteNode;
 
 	boolean flag;
 
@@ -57,10 +57,11 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 			if(suite.isTestSuiteValid()) {
 			this.extractHooks(suite);
 			this.runTestSuite(suite);
-			this.cleanUp();}
+			this.cleanUp();
+			}
 			else {
 				caseNode = suiteNode.createNode("Compilation Error In TestSuite");
-				stepNode = caseNode.createNode("Test Suite Skipped Due Failures in Hook.");
+				ExtentTest stepNode = caseNode.createNode("Test Suite Skipped Due Failures in Hook.");
 				stepNode.skip("<<nPlease Look into the test Compilation report>>");
 			}
 			System.out.println("---------" + "Completed" + "----------");
@@ -155,7 +156,7 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 		String locator = testStep.getLocator();
 		String testData = testStep.getTestData();
 
-		stepNode = caseNode.createNode(action + " " + locator + " " + testData);
+		ExtentTest stepNode = caseNode.createNode(action + " " + locator + " " + testData);
 
 		if (locator == null && testData == null) {
 			ex.executeStep(action);
@@ -169,8 +170,8 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 			// Log error in logs here with step details like action, locator and testData
 			testStep.setResult(TestStatus.INVALID, "Something missed by compiler\n<<-Didn't find a proper match->>\n");
 		}
-//		 System.out.println("Executing : " + action + "\t" + locator + "\t" + testData
-//		 + "\t" + ex.result + "\n" + ex.reason);
+		 System.out.println("Executing : " + action + "\t" + locator + "\t" + testData
+		 + "\t" + ex.result + "\n" + ex.reason);
 
 		if (ex.result == TestStatus.PASSED) {
 			testStep.setResult(TestStatus.PASSED);
@@ -198,7 +199,7 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 	}
 
 	public void skipStep(TestStep testStep, String reason) {
-		stepNode = caseNode
+		ExtentTest stepNode = caseNode
 				.createNode(testStep.getAction() + " " + testStep.getLocator() + " " + testStep.getTestData());
 		stepNode.skip(reason);
 	}

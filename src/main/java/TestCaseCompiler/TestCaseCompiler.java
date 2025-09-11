@@ -74,7 +74,7 @@ public abstract class TestCaseCompiler {
 					isTestCaseValid = false;
 				} 	
 				
-			 if(locator!=null && !locators.containsKey(locator)) {
+			 if(locator!=null && locator.length() > 0 && !locators.containsKey(locator)) {
 				 	result = result+(">> Invalid Locator Name : "+step.getLocator()+"\n");
 					step.setResult(TestStatus.INVALID,result);
 					isTestCaseValid = false;

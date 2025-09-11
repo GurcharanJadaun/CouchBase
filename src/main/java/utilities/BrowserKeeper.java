@@ -137,7 +137,7 @@ public class BrowserKeeper {
 	 
 	 public void waitForPageToRender() {
 		try {
-		 page.waitForLoadState(LoadState.NETWORKIDLE, new Page.WaitForLoadStateOptions().setTimeout(10000)); 
+		 page.waitForLoadState(LoadState.NETWORKIDLE, new Page.WaitForLoadStateOptions().setTimeout(7000)); 
 		}
 		catch(Exception ex) {
 			// must never fail this step due to exception
