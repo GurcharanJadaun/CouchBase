@@ -75,7 +75,7 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 			Cell locatorCell = row.getCell(2);
 			Cell testDataCell = row.getCell(3);
 			
-			if (testCaseIdCell !=null) {
+			if (testCaseIdCell !=null && testCaseIdCell.getStringCellValue().length()>0) {
 				
 				if(tc != null) {
 					listOfTestCases.add(tc);
@@ -86,7 +86,7 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 				tc = new TestCase();
 				tc.insertTestCaseId(tmp);
 			}
-			if(actionCell!=null) {
+			if(actionCell!=null && actionCell.getStringCellValue().length() > 0) {
 			String action = actionCell.getStringCellValue();
 			ts.insertAction(action);}
 			else {
