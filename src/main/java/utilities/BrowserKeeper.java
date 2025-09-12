@@ -100,6 +100,12 @@ public class BrowserKeeper {
 		 page.waitForSelector(locator);
 	 }
 	 
+	 public boolean isElementAbsentInDom(String locator) {
+		Locator ele = page.locator(locator);
+		System.out.println("-->"+ele.count());
+		return ele.count() == 0;
+	 }
+	 
 	 public void scrollIntoView(String locator) {
 		 page.locator(locator).scrollIntoViewIfNeeded();
 	 }
@@ -161,16 +167,20 @@ public class BrowserKeeper {
 		 String text = "";
 		 Locator ele = page.locator(locator);
 		 text = ele.textContent();
-		 try{
-			 Normalizer.normalize(text, Normalizer.Form.NFC)
-             .replaceAll("[^\\p{ASCII}]", "");
-			 text = text.trim();
-		 }catch(Exception ex) {
-			 text = "";
-		 }
 		 return text;
 	 }
 	 
+	 public boolean isButtonEnabled(String locator) {
+		 Locator ele = page.locator(locator);
+		 boolean result = ele.isEnabled();
+		 return result;
+	 }
+
+	 public boolean isButtonDisabled(String locator) {
+		 Locator ele = page.locator(locator);
+		 boolean result = ele.isDisabled();
+		 return result;
+	 }
 	 public void pressKeyboardKey(String keyName) {
 		 page.keyboard().press(keyName);
 	 }
