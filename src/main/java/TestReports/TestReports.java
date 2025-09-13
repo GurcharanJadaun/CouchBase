@@ -51,6 +51,8 @@ public class TestReports {
     						LocalTime.now().format(DateTimeFormatter.ofPattern("HHmmss"))+".html";
     	
     	this.createReport(subDir +reportName);
+    	System.out.println("Report generated: " + subDir +reportName);
+
     //	this.postProcessorForReport(subDir +reportName);
     }
     
