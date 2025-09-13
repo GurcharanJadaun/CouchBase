@@ -53,7 +53,7 @@ public class TestReports {
     	this.createReport(subDir +reportName);
     	System.out.println("Report generated: " + subDir +reportName);
 
-    	this.postProcessorForReport(subDir +reportName);
+    //	this.postProcessorForReport(subDir +reportName);
     }
     
     public void createTestRunReport() {
