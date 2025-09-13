@@ -51,7 +51,7 @@ public class TestReports {
     						LocalTime.now().format(DateTimeFormatter.ofPattern("HHmmss"))+".html";
     	
     	this.createReport(subDir +reportName);
-    	this.postProcessorForReport(subDir +reportName);
+    //	this.postProcessorForReport(subDir +reportName);
     }
     
     public void createTestRunReport() {
@@ -59,6 +59,8 @@ public class TestReports {
     	String subDir = this.baseDir +  this.pathSep + "Test Run Report"+this.pathSep;   
     	
     	this.createReport(subDir + reportName);
+  System.out.println("Report generated: " + reportDir);
+
     }
     
     void createReport(String reportDir) {
@@ -107,7 +109,9 @@ public class TestReports {
           extent.attachReporter(spark);
           extent.flush();
           
-          this.postProcessorForReport(subDir +reportName);
+       //   this.postProcessorForReport(subDir +reportName);
+  System.out.println("Report generated: " + reportDir);
+
     }
     
     
