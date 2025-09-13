@@ -35,6 +35,37 @@
   <artifactId>extentreports</artifactId>
   <version>5.0.9</version> <!-- use latest -->
 </dependency>
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.32</version> <scope>provided</scope>
+</dependency>
 </dependencies>
+
+<build>
+    <plugins>
+        <plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <version>3.1.0</version>
+    <executions>
+        <execution>
+            <id>run-tests</id>
+            <goals>
+                <goal>java</goal>
+            </goals>
+            <configuration>
+                <mainClass>runner.RunTests</mainClass>
+                <classpathScope>test</classpathScope>
+                <arguments>
+                    <argument>--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</argument>
+                    <argument>--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</argument>
+                </arguments>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+    </plugins>
+</build>
 
 </project>
