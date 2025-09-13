@@ -59,7 +59,7 @@ public class TestReports {
     	String subDir = this.baseDir +  this.pathSep + "Test Run Report"+this.pathSep;   
     	
     	this.createReport(subDir + reportName);
-  System.out.println("Report generated: " + reportDir);
+  System.out.println("Report generated: " + subDir +reportName);
 
     }
     
@@ -110,7 +110,7 @@ public class TestReports {
           extent.flush();
           
        //   this.postProcessorForReport(subDir +reportName);
-  System.out.println("Report generated: " + reportDir);
+  System.out.println("Report generated: " + subDir +reportName);
 
     }
     
