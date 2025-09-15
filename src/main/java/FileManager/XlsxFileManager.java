@@ -22,8 +22,8 @@ public class XlsxFileManager {
 	private FileInputStream fis;
 	String pathSep,dir;
 	public XlsxFileManager() {
-		pathSep = "\\";
-		this.dir = System.getProperty("user.dir") + "\\src\\main\\resources";
+		pathSep = File.separator.toString();
+		this.dir = System.getProperty("user.dir");
 	}
 	
 	public Sheet getFirstExcelSheet(String folderName, String fileName) {
