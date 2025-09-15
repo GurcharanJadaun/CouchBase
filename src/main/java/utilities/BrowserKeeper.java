@@ -72,7 +72,8 @@ public class BrowserKeeper {
 							 "--headless=new",
 							 "--no-sandbox", 
 							 "--headless", 
-							 "--disable-gpu")));
+							 "--disable-gpu",
+							 "--disable-dev-shm-usage")));
 		 }
 		  else if(browserName.equalsIgnoreCase("firefox")) {
 			 browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
