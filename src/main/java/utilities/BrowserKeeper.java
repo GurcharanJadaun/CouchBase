@@ -67,13 +67,7 @@ public class BrowserKeeper {
 		 }else if(browserName.equalsIgnoreCase("edge")) {
 			 browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
 					 .setChannel("msedge")
-					 .setHeadless(true)
-					 .setArgs(java.util.Arrays.asList(
-							 "--headless=new",
-							 "--no-sandbox", 
-							 "--headless", 
-							 "--disable-gpu",
-							 "--disable-dev-shm-usage")));
+					 .setHeadless(true));
 		 }
 		  else if(browserName.equalsIgnoreCase("firefox")) {
 			 browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
