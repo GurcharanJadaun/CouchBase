@@ -15,6 +15,8 @@
         <artifactId>playwright</artifactId>
         <version>1.44.0</version> <!-- Use latest version -->
     </dependency>
+    
+    
     <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-scratchpad -->
 <dependency>
     <groupId>org.apache.poi</groupId>
@@ -76,8 +78,21 @@
                 </arguments>
             </configuration>
         </execution>
+        <execution>
+      <id>install-browsers</id>
+      <goals>
+        <goal>java</goal>
+      </goals>
+      <configuration>
+        <mainClass>com.microsoft.playwright.CLI</mainClass>
+        <arguments>
+          <argument>install</argument>
+        </arguments>
+      </configuration>
+    </execution>
     </executions>
 </plugin>
+
     </plugins>
 </build>
 
