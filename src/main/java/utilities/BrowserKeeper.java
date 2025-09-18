@@ -199,5 +199,10 @@ public class BrowserKeeper {
 	 public void closeBrowser() {
 		 browser.close();
 	 }
+	 
+	 public String getClassOfTheElement(String locator) {
+		 String classValue = page.locator(locator).getAttribute("class");
+		 return classValue;
+	 }
 	
 }
