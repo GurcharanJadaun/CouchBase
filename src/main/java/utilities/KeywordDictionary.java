@@ -167,6 +167,22 @@ public class KeywordDictionary  {
 		browser.pressKeyboardKey(keyName);
 	}
 	
+	public void verifyWarningIsDisplayedForTheField(String locator) throws Exception {
+		String value = browser.getClassOfTheElement(locator);
+		boolean result = value.contains("customInvalid") || value.contains("mktoInvalid");
+		if(!result) {
+			throw new Exception("<< No Warning is displayed for the field >>");
+		}
+	}
+	
+	public void verifyNoWarningIsDisplayedForTheField(String locator) throws Exception {
+		String value = browser.getClassOfTheElement(locator);
+		boolean result = (value.contains("customInvalid") || value.contains("mktoInvalid"));
+		if(result) {
+			throw new Exception("<< Warning is displayed for the field >>");
+		}
+	}
+	
 	public void closeActivePage() {
 		browser.closePage();
 	}
