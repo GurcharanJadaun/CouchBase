@@ -2,13 +2,16 @@ package runner;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 
 import TestReports.TestReports;
+import deviceConfiguration.DeviceManager;
 import loader.TestSuiteLoader;
 import testManager.RunTestSuite;
 import testManager.TestCase;
@@ -17,47 +20,67 @@ import testManager.TestStep;
 import testManager.TestSuite;
 import utilities.ExecuteStep;
 
-public class RunTests extends TestSuiteLoader implements RunTestSuite {
+public class RunTests implements RunTestSuite {
 
 	TestSuite beforeAllTests, beforeEachTest, afterAllTests, afterEachTest;
+	List<TestSuite >listOfTestSuites;
 	ExtentReports report;
 	ExtentTest caseNode, suiteNode;
-
+	ExecuteStep ex ;
+	String browserName;
 	boolean flag;
 
 	RunTests() {
-		super();
-		// TODO Auto-generated constructor stub
 		report = new ExtentReports();
+		
 	}
 
 	public static void main(String args[]) {
 		Instant start = Instant.now();
-		RunTests test = new RunTests();
-
-		test.setupTest();
-		test.run();
-		new TestReports().createTestReport(test.report);
-
+		TestSuiteLoader loadTests= new TestSuiteLoader();
+		
+		loadTests.setupTest();
+		
+		
+		DeviceManager device = new DeviceManager("DeviceConfig");
+		device.setupDeviceFromJson();
+		
+		device.getBrowserList().forEach(browser -> {
+			RunTests test = new RunTests();
+			test.browserName = browser;
+			test.listOfTestSuites = new ArrayList<TestSuite>(loadTests.listOfTestSuites.size());
+			
+			for(TestSuite suite : loadTests.listOfTestSuites) {
+				test.listOfTestSuites.add(new TestSuite(suite));
+			}
+			
+			System.out.println("---------" + test.browserName + "----------");
+			test.run();
+			new TestReports().createTestReport(test.report);
+	
+		});
+	
+		
 		Instant end = Instant.now();
 		Duration timeElapsed = Duration.between(start, end);
 
 		long seconds = timeElapsed.toSeconds();
 		double minutes = timeElapsed.toMinutes();
 		System.out.println("Time taken: " + seconds + " seconds (" + minutes + " minutes)");
+
 		System.exit(0);
 	}
 
 	public void run() {
 
-		listOfTestSuites.forEach(suite -> {
+		this.listOfTestSuites.forEach(suite -> {
 			System.out.println("---------" + suite.getSuiteName() + "----------");
 			suiteNode = report.createTest(suite.getSuiteName());
 			
 			if(suite.isTestSuiteValid()) {
 			this.extractHooks(suite);
 			this.runTestSuite(suite);
-			this.cleanUp();
+			
 			}
 			else {
 				caseNode = suiteNode.createNode("Compilation Error In TestSuite");
@@ -73,11 +96,13 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 	public void runTestSuite(TestSuite testSuite) {
 		flag = true;
 
-		flag = this.runListOfTestCases(beforeAllTests.getTestCases());
+	//	flag = this.runListOfTestCases(beforeAllTests.getTestCases());
 
 		if (flag) {
 			for (TestCase testCase : testSuite.getTestCases()) {
 				caseNode = suiteNode.createNode(testCase.getTestCaseId());
+				Optional<String> deviceConfig = Optional.ofNullable(browserName);
+				ex = new ExecuteStep(deviceConfig);
 				
 				if (flag) {
 					flag = this.runListOfTestCases(this.beforeEachTest.getTestCases());
@@ -107,17 +132,19 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 								"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
 					});
 				}
+				
+				this.cleanUp();
 			}
 		}
 
-		if (flag) {
-			flag = this.runListOfTestCases(afterAllTests.getTestCases());
-		} else {
-			afterAllTests.getTestCases().forEach(tc -> {
-				this.skipTestCase(tc,
-						"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-			});
-		}
+//		if (flag) {
+//			flag = this.runListOfTestCases(afterAllTests.getTestCases());
+//		} else {
+//			afterAllTests.getTestCases().forEach(tc -> {
+//				this.skipTestCase(tc,
+//						"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+//			});
+//		}
 	}
 
 	@Override
@@ -136,6 +163,7 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 					testCase.setTestCaseResult(ts.getResult().setStatusTo());
 				}
 			}
+			ex.flush();
 		}
 		if (testCase.getTestCaseResult() == TestStatus.PENDING) {
 			testCase.setTestCaseResult(TestStatus.PASSED);
@@ -151,7 +179,7 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 	@Override
 	public void runTestStep(TestStep testStep) {
 
-		ExecuteStep ex = new ExecuteStep();
+		
 		String action = testStep.getAction();
 		String locator = testStep.getLocator();
 		String testData = testStep.getTestData();
@@ -213,7 +241,6 @@ public class RunTests extends TestSuiteLoader implements RunTestSuite {
 	}
 
 	public void cleanUp() {
-		ExecuteStep ex = new ExecuteStep();
 		ex.executeStep("closeSession");
 	}
 

@@ -1,19 +1,25 @@
 package utilities;
 
 import java.text.Normalizer;
+import java.util.Optional;
 
 import TestExceptions.SoftAssert;
-import testManager.TestStatus;
 
 public class KeywordDictionary  {
 	BrowserKeeper browser;
+	String deviceConfig;
 	
-	public KeywordDictionary(){
-		browser = new BrowserKeeper();
+	
+	public KeywordDictionary(Optional<String> deviceConfig){
+		this.deviceConfig = deviceConfig.orElse("Chrome");
 	}
 	
 
 	public void openBrowser(String param) {
+		browser = new BrowserKeeper();
+		if(param.equalsIgnoreCase("deviceConfig.browser")) {
+			param = deviceConfig;
+		}
 		browser.initiateBrowser(param);
 	}
 	

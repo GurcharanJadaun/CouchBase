@@ -23,6 +23,12 @@ public class TestSuite {
 		this.isTestSuiteValid = true;
 		
 	}
+	
+	public TestSuite(TestSuite suite) {
+		this.suiteName = suite.suiteName;
+		this.testSuite = new ArrayList<>(suite.testSuite); 
+		this.isTestSuiteValid = suite.isTestSuiteValid;
+	}
 	/**
      * adds one test case at a time to the test suite.
      * @param "testCase" add test case to the test suite.

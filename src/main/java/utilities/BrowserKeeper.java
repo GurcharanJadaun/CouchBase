@@ -1,19 +1,15 @@
 package utilities;
 
-import java.nio.file.Paths;
-import java.text.Normalizer;
 import java.util.Arrays;
 
 import com.microsoft.playwright.*;
-import com.microsoft.playwright.options.Cookie;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.SelectOption;
-import com.microsoft.playwright.options.WaitForSelectorState;
 
 public class BrowserKeeper {
-	 static Browser browser;
-	 static Page page;
-	 static Playwright playwright;	 
+	  Browser browser;
+	  Page page;
+	  Playwright playwright;	 
 	 
 	 @SuppressWarnings("unused")
 	public void initiateBrowser(String browserName) {
@@ -38,6 +34,10 @@ public class BrowserKeeper {
 			          .setArgs(Arrays.asList("--start-maximized")));
 			      
 			 }
+		  else if(browserName.equalsIgnoreCase("safari")) {
+			  browser = playwright.webkit().launch(new BrowserType.LaunchOptions().setHeadless(false));
+			  
+		  }
 		
 		 
 		 // it removes the fixed viewport 
