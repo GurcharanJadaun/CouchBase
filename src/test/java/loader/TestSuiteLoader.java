@@ -3,13 +3,14 @@ package loader;
 import java.io.File;
 
 import dataExtractor.XlsxDataExtractor;
+import deviceConfiguration.DeviceManager;
 import utilities.CleanupManager;
 
 public class TestSuiteLoader extends XlsxDataExtractor {
 	
 	String locatorDir, keywordDir, pathSep;
 	
-	protected TestSuiteLoader(){
+	public TestSuiteLoader(){
 		this.pathSep = File.separator.toString();
 		this.locatorDir = "src"+this.pathSep+"main"+this.pathSep+"resources"+this.pathSep+"CompilerDictionary"+this.pathSep+"LocatorDictionary";
 		this.keywordDir = "src"+this.pathSep+"main"+this.pathSep+"resources"+this.pathSep+"CompilerDictionary"+this.pathSep+"KeywordDictionary";
@@ -20,6 +21,7 @@ public class TestSuiteLoader extends XlsxDataExtractor {
 		CleanupManager clean = new CleanupManager();
 		
 		clean.flush();
+		
 		this.loadLocatorMap(locatorDir);
 		this.loadFunctionNames(keywordDir);
 		this.generateTestSuite();
