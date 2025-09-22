@@ -2,6 +2,7 @@ package utilities;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import testManager.TestStatus;
 
@@ -11,8 +12,12 @@ public class ExecuteStep {
 	public TestStatus result;
 	public String reason;
 
-	public ExecuteStep() {
-		keyword = new KeywordDictionary();
+	public ExecuteStep(Optional<String> deviceConfig) {
+		keyword = new KeywordDictionary(deviceConfig);
+		this.flush();
+	}
+	
+	public void flush() {
 		keywordDictionaryClass = keyword.getClass();
 		result = TestStatus.PASSED;
 		reason = "";

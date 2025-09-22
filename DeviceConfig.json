@@ -1,0 +1,14 @@
+{
+	"RunConfig": {
+		"ParallelBrowserExecution": "false",
+		"TargetOperatingSystem": "MAC",
+		"TargetBrowsers": [
+			{
+				"BrowserName": "Safari"
+			},
+			{
+				"BrowserName": "Firefox"
+			}
+		]
+	}
+}
