@@ -25,7 +25,9 @@ public abstract class TestCaseCompiler {
 		
 		List<TestCase> shortListed = suite.removeInvalidTestCasesFromSuite();
 		boolean status = new TestSuite(shortListed).suiteContainsHooks();
-		suite.setTestSuiteStatus(!status);
+		TestStatus suiteStatus = status ? TestStatus.INVALID : TestStatus.PENDING;
+		
+		suite.setTestSuiteStatus(suiteStatus);
 		
 		this.createReport(suite.getSuiteName(),shortListed);
 		
@@ -37,11 +39,11 @@ public abstract class TestCaseCompiler {
 		reports.createCompilerReport();
 		
 		for(TestSuite suite : listOfSuites) {
-			List<TestCase> shortListed = Collections.emptyList();
-				shortListed = suite.removeInvalidTestCasesFromSuite();
-				boolean status = new TestSuite(shortListed).suiteContainsHooks();
-				suite.setTestSuiteStatus(!status);
-				this.createReport(suite.getSuiteName(),shortListed);
+			List<TestCase> shortListed = suite.removeInvalidTestCasesFromSuite();
+			boolean status = new TestSuite(shortListed).suiteContainsHooks();
+			TestStatus suiteStatus = status ?  TestStatus.INVALID : TestStatus.PENDING ;	
+			suite.setTestSuiteStatus(suiteStatus);
+					this.createReport(suite.getSuiteName(),shortListed);
 			
 		}
 		

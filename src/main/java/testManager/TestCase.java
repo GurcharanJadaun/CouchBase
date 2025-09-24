@@ -12,6 +12,17 @@ public class TestCase{
 		result = TestStatus.PENDING;
 		reason = "";
 	}
+	public TestCase(TestCase tc){
+		this.result = TestStatus.PENDING;
+		this.reason = "";
+		this.steps = new ArrayList<TestStep>();
+		for (TestStep ts : tc.getSteps()) {
+	        this.steps.add(new TestStep(ts));
+	    }
+		this.testCaseId = tc.testCaseId;
+		
+		
+	}
 	
 	public void insertTestCaseId(String testCaseId) {
 		this.testCaseId = testCaseId;

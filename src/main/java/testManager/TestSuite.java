@@ -2,7 +2,6 @@ package testManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,22 +10,25 @@ public class TestSuite {
 	
 	String suiteName;
 	List<TestCase> testSuite;
-	boolean isTestSuiteValid;
+	TestStatus isTestSuiteValid;
 	
 	public TestSuite(List<TestCase> listOfTestCases) {
 		this.testSuite = listOfTestCases;
-		this.isTestSuiteValid = true;
+		this.isTestSuiteValid = TestStatus.PENDING;
 		
 	}
 	public TestSuite() {
 		this.testSuite = new ArrayList<TestCase>();
-		this.isTestSuiteValid = true;
+		this.isTestSuiteValid = TestStatus.PENDING;
 		
 	}
 	
 	public TestSuite(TestSuite suite) {
 		this.suiteName = suite.suiteName;
-		this.testSuite = new ArrayList<>(suite.testSuite); 
+		this.testSuite = new ArrayList<>(); 
+		for (TestCase tc : suite.testSuite) {
+	        this.testSuite.add(new TestCase(tc));
+	    }
 		this.isTestSuiteValid = suite.isTestSuiteValid;
 	}
 	/**
@@ -136,20 +138,25 @@ public class TestSuite {
 		boolean result = true;
 		
 		result = this.getTestCasesById("beforeEach").size() > 0 || 
-				 this.getTestCasesById("afterEach").size() > 0 ||
-				 this.getTestCasesById("afterAll").size() > 0 ||
-				 this.getTestCasesById("beforeAll").size() > 0;
+				 this.getTestCasesById("afterEach").size()  > 0 ||
+				 this.getTestCasesById("afterAll").size()   > 0 ||
+				 this.getTestCasesById("beforeAll").size()  > 0;
 				 
 		return result;
 	}
 	
-	public void setTestSuiteStatus(boolean status) {
+	public void setTestSuiteStatus(TestStatus status) {
 		this.isTestSuiteValid = status;
 	}
 	
-	public boolean isTestSuiteValid() {
+	public TestStatus getTestSuiteStatus() {
 		return this.isTestSuiteValid;
 	}
+	
+	public boolean isTestSuiteValid() {
+		return !(this.isTestSuiteValid == TestStatus.INVALID);
+	}
+	
 	
 	
 }
