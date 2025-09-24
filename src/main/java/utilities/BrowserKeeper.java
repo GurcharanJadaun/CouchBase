@@ -118,7 +118,8 @@ public class BrowserKeeper {
 	
 	public void enterTextInTextBox(String locator,String text) {
 		 Locator ele = page.locator(locator);
-		 ele.fill(text);
+		// ele.fill(text);
+		 ele.pressSequentially(text);
 	 }
 	 
 	 public void selectValueFromDropDown(String locator,String selectByLabel) {

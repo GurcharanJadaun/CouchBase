@@ -35,19 +35,43 @@ public enum TestStatus {
 		public TestStatus setStatusTo() {
 			return FAILED;
 		}
+	},
+	SKIPPED
+	{
+		@Override
+		public TestStatus setStatusTo() {
+			return SKIPPED;
+		}
+	},
+	IN_PROGRESS{
+		@Override
+		public TestStatus setStatusTo() {
+			return IN_PROGRESS;
+		}
 	};
 	
 	public boolean shouldStop() {
 		return this == STOP_EXECUTION || this == INVALID;
 	}
+	
 	public TestStatus setStatusTo() {
 		return this;
 	}
+	
 	public boolean isFailed() {
 		return this.shouldStop() || this == FAILED;
 	}
+	
 	public boolean isPassed() {
 		return this == PASSED;
+	}
+	
+	public boolean isInProgress() {
+		return this == IN_PROGRESS;
+	}
+	
+	public boolean isPending() {
+		return this == PENDING;
 	}
 }
 

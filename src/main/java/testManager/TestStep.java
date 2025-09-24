@@ -12,6 +12,14 @@ public class TestStep {
 		reason = "";
 		result = TestStatus.PENDING;
 	}
+	public TestStep(TestStep ts) {
+		this.reason = "";
+		this.result = TestStatus.PENDING;
+		this.action = ts.action;
+		this.locator = ts.locator;
+		this.testData = ts.testData;
+		this.stepNumber = ts.stepNumber;
+	}
 	
 	public void insertAction(String action) {
 		 this.action = action;

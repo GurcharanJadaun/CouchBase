@@ -32,12 +32,16 @@ public class RunTests implements RunTestSuite {
 
 	RunTests() {
 		report = new ExtentReports();
-		
+		beforeAllTests = new TestSuite();
+		beforeEachTest = new TestSuite();
+		afterAllTests = new TestSuite();
+		afterEachTest = new TestSuite();
 	}
 
 	public static void main(String args[]) {
 		Instant start = Instant.now();
 		TestSuiteLoader loadTests= new TestSuiteLoader();
+		
 		
 		loadTests.setupTest();
 		
@@ -74,7 +78,7 @@ public class RunTests implements RunTestSuite {
 	public void run() {
 
 		this.listOfTestSuites.forEach(suite -> {
-			System.out.println("---------" + suite.getSuiteName() + "----------");
+			System.out.println("---------" + suite.getSuiteName() +"----------");
 			suiteNode = report.createTest(suite.getSuiteName());
 			
 			if(suite.isTestSuiteValid()) {
@@ -133,18 +137,18 @@ public class RunTests implements RunTestSuite {
 					});
 				}
 				
-				this.cleanUp();
+			//	this.cleanUp();
 			}
 		}
 
-//		if (flag) {
-//			flag = this.runListOfTestCases(afterAllTests.getTestCases());
-//		} else {
-//			afterAllTests.getTestCases().forEach(tc -> {
-//				this.skipTestCase(tc,
-//						"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-//			});
-//		}
+		if (flag) {
+			flag = this.runListOfTestCases(afterAllTests.getTestCases());
+		} else {
+			afterAllTests.getTestCases().forEach(tc -> {
+				this.skipTestCase(tc,
+						"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+			});
+		}
 	}
 
 	@Override

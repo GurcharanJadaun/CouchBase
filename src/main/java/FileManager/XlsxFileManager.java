@@ -26,11 +26,11 @@ public class XlsxFileManager {
 		this.dir = System.getProperty("user.dir");
 	}
 	
-	public Sheet getFirstExcelSheet(String folderName, String fileName) {
+	public Sheet getFirstExcelSheet(String fileName) {
 		Sheet sheet;
 		
 	    try {
-			fis = new FileInputStream(dir + pathSep + folderName + pathSep + fileName);
+			fis = new FileInputStream(dir + pathSep + fileName);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -47,6 +47,14 @@ public class XlsxFileManager {
 		
 		return sheet;
 	}
+	public Sheet getFirstExcelSheet(String folderName, String fileName) {
+		Sheet sheet;
+		
+   	    sheet =  this.getFirstExcelSheet(folderName + pathSep + fileName);
+		
+		return sheet;
+	}
+	
 	public List<String> getExcelFileNamesFrom(String folderName) {
 		File folder = new File(dir + pathSep + folderName);
 		File[] listOfFiles = folder.listFiles();
@@ -61,7 +69,7 @@ public class XlsxFileManager {
 		return fileNames;
 	}
 	
-	public List<Sheet> getFirstExcelSheet(String folderName) {
+	public List<Sheet> getFirstExcelSheetFromAllFiles(String folderName) {
 		List<Sheet> listOfSheet= new ArrayList<Sheet>();
 		
 		File folder = new File(dir + pathSep + folderName);

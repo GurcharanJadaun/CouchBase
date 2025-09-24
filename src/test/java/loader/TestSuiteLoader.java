@@ -24,7 +24,7 @@ public class TestSuiteLoader extends XlsxDataExtractor {
 		
 		this.loadLocatorMap(locatorDir);
 		this.loadFunctionNames(keywordDir);
-		this.generateTestSuite();
+		this.generateSuiteFromTestPlan();
 		this.generateCompilationReport(listOfTestSuites);
 	}
 }

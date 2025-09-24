@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -26,27 +28,45 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 
 	protected XlsxDataExtractor() {
 		pathSep = File.separator.toString();
+		listOfTestSuites = new ArrayList<TestSuite>();
 		dir = "src" + pathSep + "main" + pathSep + "resources" + pathSep + "FeatureFiles";
 	}
 
 	public void generateTestSuite() {
 
-		listOfTestSuites = new ArrayList<TestSuite>();
 		XlsxFileManager fileManager = new XlsxFileManager();
 		List<String> fileNames = fileManager.getExcelFileNamesFrom(dir);
 
 		for (String fileName : fileNames) {
-			try {
-				TestSuite suite = loadTestCasesFromFile(fileName);
-				listOfTestSuites.add(suite);
-			} catch (IOException e) {
-				// Add logs here for File reading failure
-				e.printStackTrace();
-			}
+			this.loopOverTestSuites(fileName);
 		}
 
 	}
+	
+	public void generateSuiteFromTestPlan() {
+		XlsxFileManager fileManager = new XlsxFileManager();
+		
+		sheet = fileManager.getFirstExcelSheet("TestPlan.xlsx");
+		
+		HashMap<String, String> tmp = fileManager.createDataDictionary(sheet, 3, 4, 1);
+			
+		for(Map.Entry<String, String> item : tmp.entrySet()) {
+			if(item.getValue().equalsIgnoreCase("y")) {
+				this.loopOverTestSuites(item.getKey());
+			}
+		}
+	}
 
+	 void loopOverTestSuites(String suiteName) {
+		try {
+			TestSuite suite = loadTestCasesFromFile(suiteName);
+			listOfTestSuites.add(suite);
+		} catch (IOException e) {
+			// Add logs here for File reading failure
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public TestSuite loadTestCasesFromFile(String fileName) throws IOException {
 		TestSuite suite = new TestSuite();
@@ -122,7 +142,7 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 		XlsxFileManager fileManager = new XlsxFileManager();
 		this.locators = new HashMap<String, String>();
 
-		List<Sheet> listOfSheets = fileManager.getFirstExcelSheet(dir);
+		List<Sheet> listOfSheets = fileManager.getFirstExcelSheetFromAllFiles(dir);
 		Iterator<Sheet> it = listOfSheets.iterator();
 		while (it.hasNext()) {
 			Sheet sheet = it.next();
@@ -138,7 +158,7 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 		XlsxFileManager fileManager = new XlsxFileManager();
 		this.functionNames = new ArrayList<String>();
 
-		List<Sheet> listOfSheets = fileManager.getFirstExcelSheet(dir);
+		List<Sheet> listOfSheets = fileManager.getFirstExcelSheetFromAllFiles(dir);
 		Iterator<Sheet> it = listOfSheets.iterator();
 		while (it.hasNext()) {
 			Sheet sheet = it.next();
