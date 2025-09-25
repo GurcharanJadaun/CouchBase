@@ -60,7 +60,9 @@ public class RunTests implements RunTestSuite {
 			
 			System.out.println("---------" + test.browserName + "----------");
 			test.run();
-			new TestReports().createTestReport(test.report);
+			
+			Optional<String> suffix = Optional.ofNullable(browser+" ");
+			new TestReports().createTestReport(test.report , suffix);
 	
 		});
 	
@@ -209,8 +211,9 @@ public class RunTests implements RunTestSuite {
 			testStep.setResult(TestStatus.PASSED);
 			stepNode.pass( ex.reason);
 		} else {
+			
 			testStep.setResult(ex.result, ex.reason);
-			stepNode.fail("Step : " + ex.reason);
+			stepNode.fail("Step : " + ex.reason , ex.screenshot);
 		}
 	}
 
