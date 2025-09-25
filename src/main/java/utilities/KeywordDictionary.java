@@ -200,6 +200,9 @@ public class KeywordDictionary  {
 		browser.closeBrowserSession();
 	}
 	
+	public byte[] takeScreenshot() {
+		return browser.takeScreenshot();
+	}
 // String manipulations
 	
 	 String normaliseString(String text) {

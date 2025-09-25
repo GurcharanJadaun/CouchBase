@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
@@ -93,9 +94,11 @@ public class TestReports {
 		
     }
     
-    public void createTestReport(ExtentReports extent) {
+    public void createTestReport(ExtentReports extent, Optional<String> browserName) {
     	
-    	String reportName = "Test Run Report "+LocalDate.now()+" "+LocalTime.now().format(DateTimeFormatter.ofPattern("HHmmss"))+".html";
+    	String suffix = browserName.orElse("");
+    			
+    	String reportName = suffix + "Test Run Report "+LocalDate.now()+" "+LocalTime.now().format(DateTimeFormatter.ofPattern("HHmmss"))+".html";
     	String subDir = this.baseDir +  this.pathSep + "Test Run Report"+this.pathSep;   
     	
     	

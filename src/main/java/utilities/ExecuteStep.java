@@ -4,6 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import com.aventstack.extentreports.MediaEntityBuilder;
+import com.aventstack.extentreports.model.Media;
+
 import testManager.TestStatus;
 
 public class ExecuteStep {
@@ -11,9 +14,12 @@ public class ExecuteStep {
 	Class<?> keywordDictionaryClass;
 	public TestStatus result;
 	public String reason;
+	private MediaEntityBuilder screenshotBuilder;
+	public Media screenshot;
 
 	public ExecuteStep(Optional<String> deviceConfig) {
 		keyword = new KeywordDictionary(deviceConfig);
+		screenshot = null;
 		this.flush();
 	}
 	
@@ -98,8 +104,22 @@ public class ExecuteStep {
 			this.setResultForException(e);
 		}
 	}
+	
+	@SuppressWarnings("static-access")
+	void takeScreenshot() {
+		try {
+		byte[] screenshotBytes = this.keyword.takeScreenshot();
+		this.screenshot = this.screenshotBuilder.createScreenCaptureFromBase64String(java.util.Base64.getEncoder().encodeToString(screenshotBytes)).build();
+		}catch(Exception ex) {
+			System.out.print("<<<<<<< Screenshot Not Taken >>>>>");
+			this.screenshot = null;
+		}
+	}
 
 	void setResultForException(Exception ex) {
+		
+		this.takeScreenshot();
+		
 		if(ex.getCause()==null) {
 		this.reason = ex.toString();	
 		this.result = TestStatus.STOP_EXECUTION;
