@@ -22,20 +22,15 @@ import utilities.ExecuteStep;
 
 public class RunTests implements RunTestSuite {
 
-	TestSuite beforeAllTests, beforeEachTest, afterAllTests, afterEachTest;
 	List<TestSuite >listOfTestSuites;
 	ExtentReports report;
 	ExtentTest caseNode, suiteNode;
 	ExecuteStep ex ;
 	String browserName;
-	boolean flag;
+//	boolean flag;
 
 	RunTests() {
 		report = new ExtentReports();
-		beforeAllTests = new TestSuite();
-		beforeEachTest = new TestSuite();
-		afterAllTests = new TestSuite();
-		afterEachTest = new TestSuite();
 	}
 
 	public static void main(String args[]) {
@@ -47,11 +42,11 @@ public class RunTests implements RunTestSuite {
 		
 		
 		DeviceManager device = new DeviceManager("DeviceConfig");
-		device.setupDeviceFromJson();
+		device.getBrowserDetailsFromJson("MacParallelTestRunner");
 		
 		device.getBrowserList().forEach(browser -> {
 			RunTests test = new RunTests();
-			test.browserName = browser;
+			test.browserName = browser.getBrowserName();
 			test.listOfTestSuites = new ArrayList<TestSuite>(loadTests.listOfTestSuites.size());
 			
 			for(TestSuite suite : loadTests.listOfTestSuites) {
@@ -100,57 +95,57 @@ public class RunTests implements RunTestSuite {
 
 	@Override
 	public void runTestSuite(TestSuite testSuite) {
-		flag = true;
-
-	//	flag = this.runListOfTestCases(beforeAllTests.getTestCases());
-
-		if (flag) {
-			for (TestCase testCase : testSuite.getTestCases()) {
-				caseNode = suiteNode.createNode(testCase.getTestCaseId());
-				Optional<String> deviceConfig = Optional.ofNullable(browserName);
-				ex = new ExecuteStep(deviceConfig);
-				
-				if (flag) {
-					flag = this.runListOfTestCases(this.beforeEachTest.getTestCases());
-
-				} else {
-					// code to skip beforeEachTestCases here
-					beforeEachTest.getTestCases().forEach(tc -> {
-						this.skipTestCase(tc,
-								"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-					});
-				}
-
-				if (flag) {
-					runTestCase(testCase);
-				} else {
-					this.skipTestCase(testCase,
-							"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-				}
-
-				if (flag) {
-					flag = this.runListOfTestCases(this.afterEachTest.getTestCases());
-
-				} else {
-					// skip afterEachTestCases here
-					afterEachTest.getTestCases().forEach(tc -> {
-						this.skipTestCase(tc,
-								"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-					});
-				}
-				
-			//	this.cleanUp();
-			}
-		}
-
-		if (flag) {
-			flag = this.runListOfTestCases(afterAllTests.getTestCases());
-		} else {
-			afterAllTests.getTestCases().forEach(tc -> {
-				this.skipTestCase(tc,
-						"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-			});
-		}
+//		boolean flag = true;
+//
+//	//	flag = this.runListOfTestCases(beforeAllTests.getTestCases());
+//
+//		if (flag) {
+//			for (TestCase testCase : testSuite.getTestCases()) {
+//				caseNode = suiteNode.createNode(testCase.getTestCaseId());
+//				Optional<String> deviceConfig = Optional.ofNullable(browserName);
+//				ex = new ExecuteStep(deviceConfig);
+//				
+//				if (flag) {
+//					flag = this.runListOfTestCases(testSuite.getBeforeEachTest());
+//
+//				} else {
+//					// code to skip beforeEachTestCases here
+//					testSuite.getBeforeEachTest().forEach(tc -> {
+//						this.skipTestCase(tc,
+//								"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+//					});
+//				}
+//
+//				if (flag) {
+//					runTestCase(testCase);
+//				} else {
+//					this.skipTestCase(testCase,
+//							"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+//				}
+//
+//				if (flag) {
+//					flag = this.runListOfTestCases(testSuite.getAfterEachTest());
+//
+//				} else {
+//					// skip afterEachTestCases here
+//					testSuite.getAfterEachTest().forEach(tc -> {
+//						this.skipTestCase(tc,
+//								"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+//					});
+//				}
+//				
+//			//	this.cleanUp();
+//			}
+//		}
+//
+//		if (flag) {
+//			flag = this.runListOfTestCases(testSuite.getAfterAllTests());
+//		} else {
+//			afterAllTests.getTestCases().forEach(tc -> {
+//				this.skipTestCase(tc,
+//						"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+//			});
+//		}
 	}
 
 	@Override
@@ -218,12 +213,14 @@ public class RunTests implements RunTestSuite {
 	}
 
 	public boolean runListOfTestCases(List<TestCase> listOfTestCases) {
-		flag = true;
-		listOfTestCases.forEach(testCase -> {
+		boolean result = true;
+		
+		for(TestCase testCase : listOfTestCases) {
 			this.runTestCase(testCase);
-			flag = testCase.getTestCaseResult().isPassed(); // returns true if test is passed
-		});
-		return flag;
+			result = testCase.getTestCaseResult().isPassed(); // returns true if test is passed
+		}
+		
+		return result;
 	}
 
 	public void skipTestCase(TestCase testCase, String reason) {
@@ -240,10 +237,10 @@ public class RunTests implements RunTestSuite {
 	}
 
 	public void extractHooks(TestSuite testSuite) {
-		this.beforeAllTests = new TestSuite(testSuite.getBeforeAllMethodFromTestSuite());
-		this.beforeEachTest = new TestSuite(testSuite.getBeforeEachMethodFromTestSuite());
-		this.afterEachTest = new TestSuite(testSuite.getAfterEachMethodFromTestSuite());
-		this.afterAllTests = new TestSuite(testSuite.getAfterAllMethodFromTestSuite());
+		testSuite.extractAfterAllMethodFromTestSuite();
+		testSuite.extractAfterEachMethodFromTestSuite();
+		testSuite.extractBeforeAllMethodFromTestSuite();
+		testSuite.extractBeforeEachMethodFromTestSuite();
 
 	}
 

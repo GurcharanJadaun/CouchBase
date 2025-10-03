@@ -4,23 +4,30 @@ import java.text.Normalizer;
 import java.util.Optional;
 
 import TestExceptions.SoftAssert;
+import deviceConfiguration.BrowserConfig;
 
 public class KeywordDictionary  {
 	BrowserKeeper browser;
-	String deviceConfig;
+	BrowserConfig browserConfig;
 	
 	
-	public KeywordDictionary(Optional<String> deviceConfig){
-		this.deviceConfig = deviceConfig.orElse("Chrome");
+	public KeywordDictionary(Optional<BrowserConfig> browserConfig){
+		this.browserConfig = browserConfig.orElse(null);
 	}
 	
 
 	public void openBrowser(String param) {
 		browser = new BrowserKeeper();
 		if(param.equalsIgnoreCase("deviceConfig.browser")) {
-			param = deviceConfig;
+			param = browserConfig.getBrowserName();
 		}
-		browser.initiateBrowser(param);
+		if(browserConfig.headlessBrowser()) {
+			this.openHeadlessBrowser(param);
+		}
+		else {
+			browser.initiateBrowser(param);
+			
+		}
 	}
 	
 	public void openHeadlessBrowser(String param) {
