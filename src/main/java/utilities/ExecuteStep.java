@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.model.Media;
 
+import deviceConfiguration.BrowserConfig;
 import testManager.TestStatus;
 
 public class ExecuteStep {
@@ -17,7 +18,7 @@ public class ExecuteStep {
 	private MediaEntityBuilder screenshotBuilder;
 	public Media screenshot;
 
-	public ExecuteStep(Optional<String> deviceConfig) {
+	public ExecuteStep(Optional<BrowserConfig> deviceConfig) {
 		keyword = new KeywordDictionary(deviceConfig);
 		screenshot = null;
 		this.flush();

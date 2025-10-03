@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class TestSuite {
 	
 	String suiteName;
-	List<TestCase> testSuite;
+	List<TestCase> testSuite, beforeAllTests, beforeEachTest, afterAllTests, afterEachTest;
 	TestStatus isTestSuiteValid;
 	
 	public TestSuite(List<TestCase> listOfTestCases) {
@@ -19,17 +19,41 @@ public class TestSuite {
 	}
 	public TestSuite() {
 		this.testSuite = new ArrayList<TestCase>();
+		this.beforeAllTests = new ArrayList<TestCase>();
+		this.beforeEachTest = new ArrayList<TestCase>();
+		this.afterAllTests = new ArrayList<TestCase>();
+		this.afterEachTest = new ArrayList<TestCase>();
+		
 		this.isTestSuiteValid = TestStatus.PENDING;
 		
 	}
 	
 	public TestSuite(TestSuite suite) {
 		this.suiteName = suite.suiteName;
-		this.testSuite = new ArrayList<>(); 
+		this.isTestSuiteValid = suite.isTestSuiteValid;
+		
+		this.testSuite = new ArrayList<TestCase>();
+		this.beforeAllTests = new ArrayList<TestCase>();
+		this.beforeEachTest = new ArrayList<TestCase>();
+		this.afterAllTests = new ArrayList<TestCase>();
+		this.afterEachTest = new ArrayList<TestCase>();
+		
 		for (TestCase tc : suite.testSuite) {
 	        this.testSuite.add(new TestCase(tc));
 	    }
-		this.isTestSuiteValid = suite.isTestSuiteValid;
+		for (TestCase tc : suite.beforeAllTests) {
+	        this.beforeAllTests.add(new TestCase(tc));
+	    }
+		for (TestCase tc : suite.beforeEachTest) {
+	        this.beforeEachTest.add(new TestCase(tc));
+	    }
+		for (TestCase tc : suite.afterAllTests) {
+	        this.afterAllTests.add(new TestCase(tc));
+	    }
+		for (TestCase tc : suite.afterEachTest) {
+	        this.afterEachTest.add(new TestCase(tc));
+	    }
+		
 	}
 	/**
      * adds one test case at a time to the test suite.
@@ -51,7 +75,23 @@ public class TestSuite {
      * fetches list of test cases from the test suite.
      */
 	public List<TestCase> getTestCases(){
-		return testSuite;
+		return this.testSuite;
+	}
+	
+	public List<TestCase> getBeforeAllTests(){
+		return this.beforeAllTests;
+	}
+	
+	public List<TestCase> getAfterAllTests(){
+		return this.afterAllTests;
+	}
+	
+	public List<TestCase> getBeforeEachTest(){
+		return this.beforeEachTest;
+	}
+	
+	public List<TestCase> getAfterEachTest(){
+		return this.afterEachTest;
 	}
 	
 	/**
@@ -83,35 +123,27 @@ public class TestSuite {
 	}
 	
 	@SuppressWarnings("unlikely-arg-type")
-	public List<TestCase> getBeforeAllMethodFromTestSuite() {
-		List<TestCase> tc;
-		tc = this.getTestCasesById("beforeAll");
-		this.testSuite.removeAll(tc);
-		return tc;
+	public void extractBeforeAllMethodFromTestSuite() {
+		this.beforeAllTests = this.getTestCasesById("beforeAll");
+		this.testSuite.removeAll(this.beforeAllTests);
 	}
 	
 	@SuppressWarnings("unlikely-arg-type")
-	public List<TestCase> getBeforeEachMethodFromTestSuite() {
-		List<TestCase> tc;
-		tc = this.getTestCasesById("beforeEach");
-		this.testSuite.removeAll(tc);
-		return tc;
+	public void extractBeforeEachMethodFromTestSuite() {
+		this.beforeEachTest = this.getTestCasesById("beforeEach");
+		this.testSuite.removeAll(beforeEachTest);
 	}
 	
 	@SuppressWarnings("unlikely-arg-type")
-	public List<TestCase> getAfterAllMethodFromTestSuite() {
-		List<TestCase> tc;
-		tc = this.getTestCasesById("afterAll");
-		this.testSuite.removeAll(tc);
-		return tc;
+	public void extractAfterAllMethodFromTestSuite() {
+		this.afterAllTests = this.getTestCasesById("afterAll");
+		this.testSuite.removeAll(this.afterAllTests);
 	}
 	
 	@SuppressWarnings("unlikely-arg-type")
-	public List<TestCase> getAfterEachMethodFromTestSuite() {
-		List<TestCase> tc;
-		tc = this.getTestCasesById("afterEach");
-		this.testSuite.removeAll(tc);
-		return tc;
+	public void extractAfterEachMethodFromTestSuite() {
+		this.afterEachTest = this.getTestCasesById("afterEach");
+		this.testSuite.removeAll(this.afterEachTest);
 	}
 	
 	public List<TestCase> getListOfTestCasesByStatus(TestStatus status){
@@ -125,7 +157,7 @@ public class TestSuite {
 		removedTests = getListOfTestCasesByStatus(TestStatus.INVALID);
 		this.testSuite.removeAll(removedTests);
 		return removedTests;
-	}
+		}
 	
 	public boolean hasTestSuitePassed() {
 		
@@ -156,7 +188,6 @@ public class TestSuite {
 	public boolean isTestSuiteValid() {
 		return !(this.isTestSuiteValid == TestStatus.INVALID);
 	}
-	
-	
-	
+		
+		
 }

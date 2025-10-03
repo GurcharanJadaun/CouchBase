@@ -55,18 +55,31 @@ public class BrowserKeeper {
 							.setArgs(java.util.Arrays.asList("--headless=new",
 									"--disable-blink-features=AutomationControlled", "--disable-gpu", "--no-sandbox",
 									"--disable-dev-shm-usage")));
+			context = browser.newContext(new Browser.NewContextOptions().setUserAgent(
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
+					// .setViewportSize(1280, 720));
+					.setViewportSize(null));
 		} else if (browserName.equalsIgnoreCase("edge")) {
 			browser = playwright.chromium()
 					.launch(new BrowserType.LaunchOptions().setChannel("msedge").setHeadless(true).setArgs(
 							java.util.Arrays.asList("--headless=new", "--no-sandbox", "--headless", "--disable-gpu")));
+			context = browser.newContext(new Browser.NewContextOptions().setUserAgent(
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
+					// .setViewportSize(1280, 720));
+					.setViewportSize(null));
 		} else if (browserName.equalsIgnoreCase("firefox")) {
 			browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(true));
+			context = browser.newContext(new Browser.NewContextOptions().setUserAgent(
+					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
+					// .setViewportSize(1280, 720));
+					.setViewportSize(null));
+		}
+		else if (browserName.equalsIgnoreCase("safari")) {
+			browser = playwright.webkit().launch(new BrowserType.LaunchOptions().setHeadless(true));
+			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(1920,1080));
 		}
 
-		context = browser.newContext(new Browser.NewContextOptions().setUserAgent(
-				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
-				// .setViewportSize(1280, 720));
-				.setViewportSize(null));
+		
 		// Adds the tab on the browser
 		page = context.newPage();
 		this.movePageToTackleLazyLoad();
