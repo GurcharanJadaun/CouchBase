@@ -19,6 +19,7 @@ public class BrowserKeeper {
 			// ensures browser starts in maximized state
 			browser = playwright.chromium().launch(
 					new BrowserType.LaunchOptions().setHeadless(false).setArgs(Arrays.asList("--start-maximized")));
+			// it removes the fixed viewport (seems like rendering issue is there with fixed 1280×720 option as Accept
 			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
 
 		} else if (browserName.equalsIgnoreCase("edge")) {
@@ -35,8 +36,6 @@ public class BrowserKeeper {
 			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(1920,1080));
 		}
 
-		// it removes the fixed viewport
-		// (seems like rendering issue is there with fixed 1280×720 option as Accept
 		// cookies option isn't available)
 		
 

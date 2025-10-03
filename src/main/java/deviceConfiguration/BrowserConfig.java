@@ -30,18 +30,30 @@ public class BrowserConfig {
 		}
 	}
 	
+	/**
+	 * returns Browser Name on which test would run.
+	 */
 	public String getBrowserName() {
 		return this.browserName;
 	}
 	
+	/**
+	 * returns number of tests to be run in parallel.
+	 */
 	public int getCountOfNumberOfTests() {
 		return this.numberOfTests;
 	}
 	
+	/**
+	 * if "true" then tests will run in parallel on the assigned browser.
+	 */
 	public boolean runTestsInParallel() {
 		return this.runTestCasesInParallel;
 	}
 	
+	/**
+	 * if "true" then Browser will run tests in headless mode.
+	 */
 	public boolean headlessBrowser() {
 		return this.headless;
 	}

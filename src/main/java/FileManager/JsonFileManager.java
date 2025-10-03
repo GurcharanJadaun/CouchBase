@@ -16,7 +16,11 @@ public class JsonFileManager {
 		this.dir = System.getProperty("user.dir");
 	}
 	
-	
+	/**
+	 * returns Iterator<JsonNode> from the json file read. Will be used against JSON array files.
+	 * Doesn't need ".json" extension in file name. 
+	 * @param "filename"
+	 */	
 	public Iterator<JsonNode> getItemsFromJson(String fileName) throws IOException {
 		 ObjectMapper objectMapper = new ObjectMapper();
 	        JsonNode jsonNode = objectMapper.readTree(new File(fileName+".json"));
@@ -24,23 +28,15 @@ public class JsonFileManager {
 	    return jsonArray;
 	}
 	
+	/**
+	 * returns JsonNode from the json file read. Will be used against JSON files.
+	 * Doesn't need ".json" extension in file name. 
+	 * @param "filename"
+	 */
 	public JsonNode getItemFromJson(String fileName)throws IOException {
 		 ObjectMapper objectMapper = new ObjectMapper();
 	        JsonNode jsonNode = objectMapper.readTree(new File(fileName+".json"));
 	    return jsonNode;
-	}
-	
-	public static void main(String[] args) {
-		JsonFileManager object = new JsonFileManager();
-		
-		try {
-			JsonNode jsonItems = object.getItemFromJson("DeviceConfig");
-			// jsonItems.toString();
-			System.out.print(jsonItems.toString());
-			
-		}catch(Exception ex) {
-			System.out.print(ex.toString());
-		}
 	}
 	
 }

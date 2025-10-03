@@ -26,6 +26,10 @@ public class XlsxFileManager {
 		this.dir = System.getProperty("user.dir");
 	}
 	
+	/**
+	 * returns first Excel <Sheet> from the Excel file. Needs file extension as well to read file correctly.
+	 * @param "fileName"
+	 */
 	public Sheet getFirstExcelSheet(String fileName) {
 		Sheet sheet;
 		
@@ -47,6 +51,12 @@ public class XlsxFileManager {
 		
 		return sheet;
 	}
+	
+	/**
+	 * returns first Excel <Sheet> from the Excel file. Needs file extension as well to read file correctly.
+	 * @param "folderName"
+	 * @param "fileName"
+	 */
 	public Sheet getFirstExcelSheet(String folderName, String fileName) {
 		Sheet sheet;
 		
@@ -55,6 +65,10 @@ public class XlsxFileManager {
 		return sheet;
 	}
 	
+	/**
+	 * returns List<String> from the Directory provided. The list stores the names of .xlsx files present in directory.
+	 * @param "folderName"
+	 */
 	public List<String> getExcelFileNamesFrom(String folderName) {
 		File folder = new File(dir + pathSep + folderName);
 		File[] listOfFiles = folder.listFiles();
@@ -69,6 +83,10 @@ public class XlsxFileManager {
 		return fileNames;
 	}
 	
+	/**
+	 * returns List<Sheet>. List of Excel <Sheet> from all the Excel files present under the directory.
+	 * @param "folderName"
+	 */
 	public List<Sheet> getFirstExcelSheetFromAllFiles(String folderName) {
 		List<Sheet> listOfSheet= new ArrayList<Sheet>();
 		
@@ -107,6 +125,11 @@ public class XlsxFileManager {
 		return listOfSheet;
 	}
 	
+	/**
+	 * returns List<Sheet>. All Excel Sheets from the Excel file present under the directory.
+	 * @param "folderName"
+	 * @param "fileName"
+	 */
 	public List<Sheet> getAllExcelSheets(String folderName, String fileName) {
 		List<Sheet> listOfSheets = new ArrayList<Sheet>();
 		
@@ -133,6 +156,14 @@ public class XlsxFileManager {
 		
 		return listOfSheets;
 	}
+	
+	/**
+	 * returns HashMap<String,String>. Reads @param "sheet" to create hash map having keyCellIndex from Sheet as keys and valueCellIndex as values. .
+	 * @param "sheet"
+	 * @param "keyCellIndex"
+	 * @param "valueCellIndex"
+	 * @param "skipRows"
+	 */
 	public HashMap<String,String> createDataDictionary(Sheet sheet,int keyCellIndex, int valueCellIndex, int skipRows){
 		HashMap<String,String> dictionary= new HashMap<String,String>();
 		int rowCount = 0;

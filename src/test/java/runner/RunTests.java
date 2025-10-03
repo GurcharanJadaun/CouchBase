@@ -6,33 +6,27 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
-
 import TestReports.TestReports;
+import deviceConfiguration.BrowserConfig;
 import deviceConfiguration.DeviceManager;
 import loader.TestSuiteLoader;
-import testManager.RunTestSuite;
 import testManager.TestCase;
 import testManager.TestStatus;
 import testManager.TestStep;
 import testManager.TestSuite;
 import utilities.ExecuteStep;
 
-public class RunTests implements RunTestSuite {
-
-	List<TestSuite >listOfTestSuites;
+public class RunTests {
 	ExtentReports report;
-	ExtentTest caseNode, suiteNode;
-	ExecuteStep ex ;
-	String browserName;
-//	boolean flag;
-
 	RunTests() {
 		report = new ExtentReports();
 	}
-
 	public static void main(String args[]) {
 		Instant start = Instant.now();
 		TestSuiteLoader loadTests= new TestSuiteLoader();
@@ -42,26 +36,16 @@ public class RunTests implements RunTestSuite {
 		
 		
 		DeviceManager device = new DeviceManager("DeviceConfig");
-		device.getBrowserDetailsFromJson("MacParallelTestRunner");
+		device.getBrowserDetailsFromJson("TestRunner");
 		
-		device.getBrowserList().forEach(browser -> {
-			RunTests test = new RunTests();
-			test.browserName = browser.getBrowserName();
-			test.listOfTestSuites = new ArrayList<TestSuite>(loadTests.listOfTestSuites.size());
-			
-			for(TestSuite suite : loadTests.listOfTestSuites) {
-				test.listOfTestSuites.add(new TestSuite(suite));
-			}
-			
-			System.out.println("---------" + test.browserName + "----------");
-			test.run();
-			
-			Optional<String> suffix = Optional.ofNullable(browser+" ");
-			new TestReports().createTestReport(test.report , suffix);
-	
-		});
-	
+		RunTests runner = new RunTests();
+		if(device.runTestsOnBrowsersInParallel()) {
+		runner.testBrowsersInParallel(device, loadTests.listOfTestSuites);}
+		else {
+		runner.testBrowsersSequentially(device, loadTests.listOfTestSuites);	
+		}
 		
+			
 		Instant end = Instant.now();
 		Duration timeElapsed = Duration.between(start, end);
 
@@ -71,73 +55,135 @@ public class RunTests implements RunTestSuite {
 
 		System.exit(0);
 	}
-
-	public void run() {
-
-		this.listOfTestSuites.forEach(suite -> {
-			System.out.println("---------" + suite.getSuiteName() +"----------");
-			suiteNode = report.createTest(suite.getSuiteName());
-			
-			if(suite.isTestSuiteValid()) {
-			this.extractHooks(suite);
-			this.runTestSuite(suite);
-			
-			}
-			else {
-				caseNode = suiteNode.createNode("Compilation Error In TestSuite");
-				ExtentTest stepNode = caseNode.createNode("Test Suite Skipped Due Failures in Hook.");
-				stepNode.skip("<<nPlease Look into the test Compilation report>>");
-			}
-			System.out.println("---------" + "Completed" + "----------");
+	
+	public void testBrowsersSequentially(DeviceManager device, List<TestSuite> testSuites) {
+		device.getBrowserList().forEach(browser -> {
+			report = new ExtentReports(); // creates fresh report for each browser
+			this.testSuiteSequential(testSuites, browser);
+			Optional<String> suffix = Optional.ofNullable(browser.getBrowserName()+" ");
+			new TestReports().createTestReport(this.report , suffix);
+	
 		});
+	
 
 	}
+	
+	public void testBrowsersInParallel(DeviceManager device, List<TestSuite> testSuites) {
+		// do this later
+		int numberOfThreads = device.getBrowserList().size();
+		
+		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+		
+		for (BrowserConfig browser : device.getBrowserList()) {
+			executor.submit(()-> testSuiteSequential(testSuites, browser));
+		}
+		
+		executor.shutdown();
+		try {
+		    if (!executor.awaitTermination(30, TimeUnit.MINUTES)) {
+		        executor.shutdownNow();
+		    }
+		} catch (InterruptedException e) {
+		    executor.shutdownNow();
+		    Thread.currentThread().interrupt();
+		}
+		
+	}
+	
+	public void testSuiteSequential(List<TestSuite> testSuites, BrowserConfig browser) {
+		for(TestSuite testSuite : testSuites) {
+			TestSuite suite = (new TestSuite(testSuite));
+		
+		System.out.println("---------" + browser.getBrowserName() + "----------");
+		ExtentTest suiteNode = this.report.createTest(suite.getSuiteName());
+		
+		this.extractHooks(suite);
+		
+		
+		if(browser.runTestsInParallel()) {
+		this.testCaseInParallel(suite,suiteNode,browser);}
+		else {
+		this.runTestSuite(suite, suiteNode, browser);	
+		}
+	}
+	}
+	
+ 	private void testCaseInParallel(TestSuite testSuite, ExtentTest suiteNode, BrowserConfig browserDetails) {
+		int numberOfThreads = browserDetails.getCountOfNumberOfTests();
 
-	@Override
-	public void runTestSuite(TestSuite testSuite) {
-//		boolean flag = true;
-//
-//	//	flag = this.runListOfTestCases(beforeAllTests.getTestCases());
-//
-//		if (flag) {
-//			for (TestCase testCase : testSuite.getTestCases()) {
-//				caseNode = suiteNode.createNode(testCase.getTestCaseId());
-//				Optional<String> deviceConfig = Optional.ofNullable(browserName);
-//				ex = new ExecuteStep(deviceConfig);
-//				
-//				if (flag) {
-//					flag = this.runListOfTestCases(testSuite.getBeforeEachTest());
-//
-//				} else {
-//					// code to skip beforeEachTestCases here
-//					testSuite.getBeforeEachTest().forEach(tc -> {
-//						this.skipTestCase(tc,
-//								"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-//					});
-//				}
-//
-//				if (flag) {
-//					runTestCase(testCase);
-//				} else {
-//					this.skipTestCase(testCase,
-//							"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-//				}
-//
-//				if (flag) {
-//					flag = this.runListOfTestCases(testSuite.getAfterEachTest());
-//
-//				} else {
-//					// skip afterEachTestCases here
-//					testSuite.getAfterEachTest().forEach(tc -> {
-//						this.skipTestCase(tc,
-//								"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-//					});
-//				}
-//				
-//			//	this.cleanUp();
-//			}
-//		}
-//
+		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+		
+		for (TestCase testCase : testSuite.getTestCases()) {
+			
+			List<TestCase> combineTestCase = new ArrayList<TestCase>();
+			
+			combineTestCase.addAll(testSuite.getBeforeEachTest());
+			combineTestCase.add(testCase);
+			combineTestCase.addAll(testSuite.getAfterEachTest());
+			
+				
+			final TestSuite minisuite = new TestSuite(); 
+			minisuite.addTestCases(combineTestCase);
+			this.extractHooks(minisuite);
+			
+			// create parallel runner here.
+			executor.submit(() -> runTestSuite(minisuite, suiteNode, browserDetails));
+	
+		}
+
+		executor.shutdown();
+		try {
+		    if (!executor.awaitTermination(30, TimeUnit.MINUTES)) {
+		        executor.shutdownNow();
+		    }
+		} catch (InterruptedException e) {
+		    executor.shutdownNow();
+		    Thread.currentThread().interrupt();
+		}
+
+	}
+	
+	private void runTestSuite(TestSuite testSuite, ExtentTest suiteNode, BrowserConfig browserDetails) {
+		
+	//	flag = this.runListOfTestCases(beforeAllTests.getTestCases());
+		boolean flag =true;
+			
+			for (TestCase testCase : testSuite.getTestCases()) {
+			ExtentTest caseNode = suiteNode.createNode(testCase.getTestCaseId());
+				Optional<BrowserConfig> deviceConfig = Optional.ofNullable(browserDetails);
+				ExecuteStep ex = new ExecuteStep(deviceConfig);
+				
+				
+				if (flag) {
+					
+					flag = this.runListOfTestCases(testSuite.getBeforeEachTest(), caseNode, ex);
+					
+				} else {
+					// code to skip beforeEachTestCases here
+					testSuite.getBeforeEachTest().forEach(tc -> {
+						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+					});
+				}
+
+				if (flag) {
+					this.runTestCase(testCase, caseNode, ex);
+				} else {
+					this.skipTestCase(testCase, caseNode, "<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+				}
+
+				if (flag) {
+					flag = this.runListOfTestCases(testSuite.getAfterEachTest(), caseNode, ex);
+
+				} else {
+					// skip afterEachTestCases here
+					testSuite.getAfterEachTest().forEach(tc -> {
+						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+					});
+				}
+				
+				this.cleanUp(ex);
+			}
+
 //		if (flag) {
 //			flag = this.runListOfTestCases(testSuite.getAfterAllTests());
 //		} else {
@@ -147,18 +193,22 @@ public class RunTests implements RunTestSuite {
 //			});
 //		}
 	}
+	
+	private void cleanUp(ExecuteStep ex) {
+		ex.executeStep("closeSession");
+	}
 
-	@Override
-	public void runTestCase(TestCase testCase) {
+
+	private void runTestCase(TestCase testCase, ExtentTest testCaseNode, ExecuteStep ex) {
 		Instant start = Instant.now();
 
 		Iterator<TestStep> it = testCase.getSteps().iterator();
 		while (it.hasNext()) {
 			TestStep ts = it.next();
 			if (testCase.getTestCaseResult().isFailed()) {
-				this.skipStep(ts, ">> Skipped because of error above<< ");
+				this.skipStep(ts,testCaseNode ,">> Skipped because of error above<< ");
 			} else {
-				runTestStep(ts);
+				runTestStep(ts, testCaseNode, ex);
 
 				if (ts.getResult().isFailed()) {
 					testCase.setTestCaseResult(ts.getResult().setStatusTo());
@@ -174,18 +224,41 @@ public class RunTests implements RunTestSuite {
 
 		System.out.println("Executing : " + testCase.getTestCaseId() + "\t" + testCase.getTestCaseResult() + "\t"
 				+ timeElapsed.toSeconds() + "\t" + testCase.getTestCaseReason());
+	}
+
+	
+	private void skipTestCase(TestCase testCase, ExtentTest testCaseNode, String reason) {
+		testCase.getSteps().forEach(step -> {
+			this.skipStep(step, testCaseNode, reason);
+		});
 
 	}
 
-	@Override
-	public void runTestStep(TestStep testStep) {
-
+	private boolean runListOfTestCases(List<TestCase> listOfTestCases, ExtentTest testCaseNode, ExecuteStep ex) {
+		boolean result = true;
 		
+		for(TestCase testCase : listOfTestCases) {
+			this.runTestCase(testCase,testCaseNode,ex);
+			result = testCase.getTestCaseResult().isPassed(); // returns true if test is passed
+		}
+		
+		return result;
+	}
+
+	
+	private void skipStep(TestStep testStep, ExtentTest testCaseNode ,String reason) {
+		ExtentTest stepNode = testCaseNode
+				.createNode(testStep.getAction() + " " + testStep.getLocator() + " " + testStep.getTestData());
+		stepNode.skip(reason);
+	}
+
+	private void runTestStep(TestStep testStep, ExtentTest testCaseNode, ExecuteStep ex) {
+
 		String action = testStep.getAction();
 		String locator = testStep.getLocator();
 		String testData = testStep.getTestData();
 
-		ExtentTest stepNode = caseNode.createNode(action + " " + locator + " " + testData);
+		ExtentTest stepNode = testCaseNode.createNode(action + " " + locator + " " + testData);
 
 		if (locator == null && testData == null) {
 			ex.executeStep(action);
@@ -199,53 +272,24 @@ public class RunTests implements RunTestSuite {
 			// Log error in logs here with step details like action, locator and testData
 			testStep.setResult(TestStatus.INVALID, "Something missed by compiler\n<<-Didn't find a proper match->>\n");
 		}
-		 System.out.println("Executing : " + action + "\t" + locator + "\t" + testData
-		 + "\t" + ex.result + "\n" + ex.reason);
+		System.out.println(
+				"Executing : " + action + "\t" + locator + "\t" + testData + "\t" + ex.result + "\n" + ex.reason);
 
 		if (ex.result == TestStatus.PASSED) {
 			testStep.setResult(TestStatus.PASSED);
-			stepNode.pass( ex.reason);
+			stepNode.pass(ex.reason);
 		} else {
-			
+
 			testStep.setResult(ex.result, ex.reason);
-			stepNode.fail("Step : " + ex.reason , ex.screenshot);
+			stepNode.fail("Step : " + ex.reason, ex.screenshot);
 		}
 	}
-
-	public boolean runListOfTestCases(List<TestCase> listOfTestCases) {
-		boolean result = true;
-		
-		for(TestCase testCase : listOfTestCases) {
-			this.runTestCase(testCase);
-			result = testCase.getTestCaseResult().isPassed(); // returns true if test is passed
-		}
-		
-		return result;
-	}
-
-	public void skipTestCase(TestCase testCase, String reason) {
-		
-		testCase.getSteps().forEach(step -> {
-			this.skipStep(step, reason);
-		});
-	}
-
-	public void skipStep(TestStep testStep, String reason) {
-		ExtentTest stepNode = caseNode
-				.createNode(testStep.getAction() + " " + testStep.getLocator() + " " + testStep.getTestData());
-		stepNode.skip(reason);
-	}
-
-	public void extractHooks(TestSuite testSuite) {
+	
+	private void extractHooks(TestSuite testSuite) {
 		testSuite.extractAfterAllMethodFromTestSuite();
 		testSuite.extractAfterEachMethodFromTestSuite();
 		testSuite.extractBeforeAllMethodFromTestSuite();
 		testSuite.extractBeforeEachMethodFromTestSuite();
 
 	}
-
-	public void cleanUp() {
-		ex.executeStep("closeSession");
-	}
-
 }
