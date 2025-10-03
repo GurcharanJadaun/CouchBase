@@ -19,18 +19,30 @@ public class DeviceManager {
 		browsers = new ArrayList<BrowserConfig>();
 	}
 	
-	public boolean runTestsInParallel() {
+	/**
+	 * if true runs the configured browsers in parallel for testing on the device.
+	 */
+	public boolean runTestsOnBrowsersInParallel() {
 		return this.runTestsOnBrowsersInParallel;
 	}
-
+	
+	/**
+	 * returns false if there was an issue while reading the device config file.
+	 */
 	public boolean isConfigValid() {
 		return this.isConfigValid;
 	}
-
+	
+	/**
+	 * returns List<BrowserConfig>. The list has the browser configuration details.
+	 */
 	public List<BrowserConfig> getBrowserList() {
 		return this.browsers;
 	}
 	
+	/**
+	 * returns JsonNode which contains one of the device configuration.
+	 */
 	private JsonNode getTestRunnerConfig(String configName) {
 		JsonNode shortListedConfig = null;
 		try {
@@ -57,6 +69,11 @@ public class DeviceManager {
 
 	}
 	
+	/**
+	 * Assigns Browser Details to the list of BrowserConfig from the JSON Array filtered by "ConfigName" parameter.
+	 * 
+	 * @param "configName" to be used for testing.
+	 */
 	public void getBrowserDetailsFromJson(String configName) {
 		
 		JsonNode shortListedConfig = this.getTestRunnerConfig(configName);
