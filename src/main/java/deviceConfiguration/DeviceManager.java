@@ -87,11 +87,14 @@ public class DeviceManager {
 			}else {
 				this.runTestsOnBrowsersInParallel = false;
 			}
-			
-			shortListedConfig.get("TargetBrowsers").elements().forEachRemaining(item -> {
-					browsers.add(new BrowserConfig(item));
-				});
-			
+			 int i =0;
+			 Iterator<JsonNode> it = shortListedConfig.get("TargetBrowsers").elements();
+			 while(it.hasNext()) {
+				 JsonNode item = it.next();
+				 browsers.add(new BrowserConfig(item, i));
+				 i++;
+				 
+			 }
 			
 		}else {
 			System.out.println("Config Name '" + configName+"' not available in DeviceConfig.JSON");

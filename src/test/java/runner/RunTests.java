@@ -23,10 +23,8 @@ import testManager.TestSuite;
 import utilities.ExecuteStep;
 
 public class RunTests {
-	ExtentReports report;
-	RunTests() {
-		report = new ExtentReports();
-	}
+	ExtentReports[] reports;
+	
 	public static void main(String args[]) {
 		Instant start = Instant.now();
 		TestSuiteLoader loadTests= new TestSuiteLoader();
@@ -36,7 +34,7 @@ public class RunTests {
 		
 		
 		DeviceManager device = new DeviceManager("DeviceConfig");
-		device.getBrowserDetailsFromJson("TestRunner");
+		device.getBrowserDetailsFromJson("MacParallelTestRunner");
 		
 		RunTests runner = new RunTests();
 		if(device.runTestsOnBrowsersInParallel()) {
@@ -57,11 +55,12 @@ public class RunTests {
 	}
 	
 	public void testBrowsersSequentially(DeviceManager device, List<TestSuite> testSuites) {
+		reports = new ExtentReports[device.getBrowserList().size()];
 		device.getBrowserList().forEach(browser -> {
-			report = new ExtentReports(); // creates fresh report for each browser
+			reports[browser.getBrowserSerialNumber()] = new ExtentReports(); // creates fresh report for each browser
 			this.testSuiteSequential(testSuites, browser);
 			Optional<String> suffix = Optional.ofNullable(browser.getBrowserName()+" ");
-			new TestReports().createTestReport(this.report , suffix);
+			new TestReports().createTestReport(this.reports[browser.getBrowserSerialNumber()] , suffix);
 	
 		});
 	
@@ -71,21 +70,28 @@ public class RunTests {
 	public void testBrowsersInParallel(DeviceManager device, List<TestSuite> testSuites) {
 		// do this later
 		int numberOfThreads = device.getBrowserList().size();
-		
+		reports = new ExtentReports[numberOfThreads];
 		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 		
 		for (BrowserConfig browser : device.getBrowserList()) {
+			reports[browser.getBrowserSerialNumber()] = new ExtentReports(); // creates fresh report for each browser
 			executor.submit(()-> testSuiteSequential(testSuites, browser));
 		}
 		
 		executor.shutdown();
 		try {
-		    if (!executor.awaitTermination(30, TimeUnit.MINUTES)) {
+		    if (!executor.awaitTermination(60, TimeUnit.MINUTES)) {
 		        executor.shutdownNow();
 		    }
 		} catch (InterruptedException e) {
 		    executor.shutdownNow();
 		    Thread.currentThread().interrupt();
+		}finally{
+
+			for (BrowserConfig browser : device.getBrowserList()) {
+				Optional<String> suffix = Optional.ofNullable(browser.getBrowserName()+" ");
+				new TestReports().createTestReport(this.reports[browser.getBrowserSerialNumber()] , suffix);
+			}
 		}
 		
 	}
@@ -95,7 +101,7 @@ public class RunTests {
 			TestSuite suite = (new TestSuite(testSuite));
 		
 		System.out.println("---------" + browser.getBrowserName() + "----------");
-		ExtentTest suiteNode = this.report.createTest(suite.getSuiteName());
+		ExtentTest suiteNode = this.reports[browser.getBrowserSerialNumber()].createTest(suite.getSuiteName());
 		
 		this.extractHooks(suite);
 		
