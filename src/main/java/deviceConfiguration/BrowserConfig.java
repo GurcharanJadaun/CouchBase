@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class BrowserConfig {
 	
 	String browserName;
-	int numberOfTests;
+	int numberOfTests, browserNumber;
 	boolean runTestCasesInParallel, headless;
 	
-	BrowserConfig(JsonNode browserConfig){
+	BrowserConfig(JsonNode browserConfig,int browserNumber){
 		this.browserName = browserConfig.get("BrowserName").asText();
 		
 		if (browserConfig.hasNonNull("NumberOfTests")) {
@@ -28,6 +28,8 @@ public class BrowserConfig {
 		}else {
 			this.headless = true;
 		}
+		
+		this.browserNumber = browserNumber;
 	}
 	
 	/**
@@ -56,6 +58,10 @@ public class BrowserConfig {
 	 */
 	public boolean headlessBrowser() {
 		return this.headless;
+	}
+	
+	public int getBrowserSerialNumber() {
+		return this.browserNumber;
 	}
 
 }
