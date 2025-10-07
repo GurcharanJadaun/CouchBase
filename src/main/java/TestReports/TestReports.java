@@ -79,7 +79,7 @@ public class TestReports {
         	 for(TestCase testCase: suite.getTestCases()) {
         		 ExtentTest caseNode = suiteNode.createNode(testCase.getTestCaseId());
         		 for(TestStep step : testCase.getSteps()) {
-        			 ExtentTest caseStep = caseNode.createNode(step.getAction() + " " + step.getLocator() + " " + step.getTestData());
+        			 ExtentTest caseStep = caseNode.createNode(step.getStepDescription());
         			 if(step.getResult().isFailed()) {
         				 caseStep.fail("Step : "+step.getTestStepReason());
         			 }else {

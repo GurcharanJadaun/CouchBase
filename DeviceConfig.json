@@ -2,19 +2,19 @@
 	"ConfigName" : "MacParallelTestRunner",
 	"RunConfig": {
 		"TargetOperatingSystem": "MAC",
-		"ParallelBrowserExecution" : "false",
+		"ParallelBrowserExecution" : "true",
 		"TargetBrowsers": [
 			{
 				"BrowserName": "Chrome",
 				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
-				"HeadlessBrowser" : "false"
+				"HeadlessBrowser" : "true"
 			},
 			{
 				"BrowserName": "Firefox",
-				"ParallelTestExecution": "false",
+				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
-				"HeadlessBrowser" : "false"
+				"HeadlessBrowser" : "true"
 			}
 		]
 	}

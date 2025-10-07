@@ -254,32 +254,32 @@ public class RunTests {
 	
 	private void skipStep(TestStep testStep, ExtentTest testCaseNode ,String reason) {
 		ExtentTest stepNode = testCaseNode
-				.createNode(testStep.getAction() + " " + testStep.getLocator() + " " + testStep.getTestData());
+				.createNode(testStep.getStepDescription());
 		stepNode.skip(reason);
 	}
 
 	private void runTestStep(TestStep testStep, ExtentTest testCaseNode, ExecuteStep ex) {
 
-		String action = testStep.getAction();
-		String locator = testStep.getLocator();
-		String testData = testStep.getTestData();
+		String action = testStep.getAction() == null ? "" : testStep.getAction() ;
+		String locator = testStep.getLocator() == null ? "" : testStep.getLocator() ;
+		String testData = testStep.getTestData() == null ? "" : testStep.getTestData() ;
 
-		ExtentTest stepNode = testCaseNode.createNode(action + " " + locator + " " + testData);
+		ExtentTest stepNode = testCaseNode.createNode(testStep.getStepDescription());
 
-		if (locator == null && testData == null) {
+		if (locator.length() == 0 && testData.length() == 0) {
 			ex.executeStep(action);
-		} else if (locator == null && testData != null) {
+		} else if (locator.length() == 0 && testData.length() != 0) {
 			ex.executeStep(action, testData);
-		} else if (locator != null && testData == null) {
+		} else if (locator.length() != 0 && testData.length() == 0) {
 			ex.executeStep(action, locator);
-		} else if (locator != null && testData != null) {
+		} else if (locator.length() != 0 && testData.length() != 0) {
 			ex.executeStep(action, locator, testData);
 		} else {
 			// Log error in logs here with step details like action, locator and testData
 			testStep.setResult(TestStatus.INVALID, "Something missed by compiler\n<<-Didn't find a proper match->>\n");
 		}
 		System.out.println(
-				"Executing : " + action + "\t" + locator + "\t" + testData + "\t" + ex.result + "\n" + ex.reason);
+				"Executing : " + testStep.getStepDescription() + "\t" + ex.result + "\n" + ex.reason);
 
 		if (ex.result == TestStatus.PASSED) {
 			testStep.setResult(TestStatus.PASSED);

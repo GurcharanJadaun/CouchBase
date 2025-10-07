@@ -13,6 +13,9 @@ import java.util.Optional;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import FileManager.XlsxFileManager;
 import TestCaseCompiler.TestCaseCompiler;
 import testManager.CreateTestSuite;
@@ -74,7 +77,8 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 		suite.setSuitName(fileName);
 
 		sheet = fileManager.getFirstExcelSheet(this.dir, fileName);
-		List<TestCase> listOfTests = createListOfTestCases();
+		JSONArray testCasesJson = fileManager.excelSheetToJsonArray(sheet);
+		List<TestCase> listOfTests = createListOfTestCases(testCasesJson);
 
 		this.compileTestCases(listOfTests);
 		suite.addTestCases(listOfTests);
@@ -88,7 +92,9 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 		List<TestCase> listOfTestCases = new ArrayList<TestCase>();
 		int stepNumber = 0, skipRow = 1, rowCount = 0;
 		TestCase tc = null;
-
+		
+		
+		
 		for (Row row : sheet) {
 			if (skipRow > rowCount) {
 				rowCount++;
@@ -137,7 +143,51 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 		return listOfTestCases;
 
 	}
+	
+	public List<TestCase> createListOfTestCases(JSONArray listOfSteps) {
+		List<TestCase> listOfTestCases = new ArrayList<TestCase>();
+		TestCase tc = null;
+		int stepNumber=1;
+		
+		for(int i=0; i<listOfSteps.length(); i++) {
+			TestStep ts = new TestStep();
+			
+			String testCaseId = listOfSteps.getJSONObject(i).get("Test Case Id").toString();
+			String action = listOfSteps.getJSONObject(i).get("Action").toString();
+			String locator = listOfSteps.getJSONObject(i).get("Locator").toString();
+			String testData = listOfSteps.getJSONObject(i).get("Test Data").toString();
+			
+			
+			if(testCaseId.length()>0) {
+				if (tc != null) {
+					listOfTestCases.add(tc);
+				}
 
+				stepNumber = 1;
+				tc = new TestCase();
+				tc.insertTestCaseId(testCaseId);
+
+			}
+			
+			if(action.length() > 0){
+				
+				ts.insertAction(action);
+				ts.insertLocator(Optional.ofNullable(locator));
+				ts.insertTestData(Optional.ofNullable(testData));
+				ts.setStepNumber(stepNumber);
+				
+				tc.addSteps(ts);
+				stepNumber++;
+			}
+		}
+		
+		listOfTestCases.add(tc);
+
+		return listOfTestCases;
+
+	}
+
+	@Override
 	public void loadLocatorMap(String dir) {
 		XlsxFileManager fileManager = new XlsxFileManager();
 		this.locators = new HashMap<String, String>();
@@ -146,7 +196,18 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 		Iterator<Sheet> it = listOfSheets.iterator();
 		while (it.hasNext()) {
 			Sheet sheet = it.next();
-			HashMap<String, String> tmp = fileManager.createDataDictionary(sheet, 2, 3, 1);
+			HashMap<String, String> tmp = new HashMap<String, String>();
+
+			JSONArray items = fileManager.excelSheetToJsonArray(sheet);
+			
+			for (int i = 0; i < items.length(); i++) {
+				JSONObject row = items.getJSONObject(i);
+				String locatorName = row.get("Locator Name").toString();
+				String locatorValue = row.get("Locator Value").toString();
+
+				tmp.put(locatorName, locatorValue);
+			}
+
 			this.locators.putAll(tmp);
 		}
 
@@ -156,17 +217,26 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 	@Override
 	public void loadFunctionNames(String dir) {
 		XlsxFileManager fileManager = new XlsxFileManager();
-		this.functionNames = new ArrayList<String>();
+		this.functionDetails = new HashMap<String, String>();
 
 		List<Sheet> listOfSheets = fileManager.getFirstExcelSheetFromAllFiles(dir);
 		Iterator<Sheet> it = listOfSheets.iterator();
 		while (it.hasNext()) {
 			Sheet sheet = it.next();
-			HashMap<String, String> tmp = fileManager.createDataDictionary(sheet, 3, 4, 1);
-			this.functionNames.addAll(tmp.keySet());
-		}
+			HashMap<String, String> tmp = new HashMap<String, String>();
 
-		System.out.println("Extracted total number of Functions : " + this.functionNames.size());
+			JSONArray items = fileManager.excelSheetToJsonArray(sheet);
+
+			for (int i = 0; i < items.length(); i++) {
+				JSONObject row = items.getJSONObject(i);
+				String functionName = row.get("Function Name").toString();
+				String functionDescription = row.get("Function Description").toString();
+
+				tmp.put(functionName, functionDescription);
+			}
+			functionDetails.putAll(tmp);
+		}
+		System.out.println("Extracted total number of Functions : " + this.functionDetails.size());
 
 	}
 
