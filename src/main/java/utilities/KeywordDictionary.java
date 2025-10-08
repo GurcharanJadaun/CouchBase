@@ -109,9 +109,9 @@ public class KeywordDictionary  {
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
 		String actualData = browser.getTextFromTextBox(locatorData);
-		if(expectedData.equalsIgnoreCase("null")) {
-			expectedData = "";
-		}
+		
+		expectedData = expectedData.equalsIgnoreCase("{NULL}") || expectedData.equalsIgnoreCase("{EMPTY}") ? "" : expectedData ;
+		
 		if(!actualData.equals(expectedData.trim())) {
 			throw new Exception("<< Expected and Actual Data don't match >>"+
 			"\nActual Data : "+ actualData +
@@ -122,10 +122,10 @@ public class KeywordDictionary  {
 	public void textBoxShouldHaveValue(String locatorData, String expectedData) throws SoftAssert{
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
+		
 		String actualData = browser.getTextFromTextBox(locatorData);
-		if(expectedData.equalsIgnoreCase("null")) {
-			expectedData = "";
-		}
+		expectedData = expectedData.equalsIgnoreCase("{NULL}") || expectedData.equalsIgnoreCase("{EMPTY}") ? "" : expectedData ;
+		
 		if(!actualData.equals(expectedData)) {
 			throw new SoftAssert("<< Expected and Actual Data don't match >>"+
 			"\nActual Data : "+ actualData +
@@ -136,7 +136,10 @@ public class KeywordDictionary  {
 	public void elementMustHaveText(String locatorData, String expectedData) throws Exception {
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
+		
 		String actualData = browser.getTextFromElement(locatorData);
+		expectedData = expectedData.equalsIgnoreCase("{NULL}") || expectedData.equalsIgnoreCase("{EMPTY}") ? "" : expectedData ;
+		
 		if(!this.normaliseString(actualData).equals(this.normaliseString(expectedData))) {
 			throw new Exception("<< Expected and Actual Data don't match >>"+
 								"\nActual Data   : "+ actualData +
@@ -161,7 +164,10 @@ public class KeywordDictionary  {
 	public void elementShouldHaveText(String locatorData, String expectedData) throws SoftAssert {
 		browser.waitForPresenceOfElement(locatorData);
 		browser.scrollIntoView(locatorData);
+		
 		String actualData = browser.getTextFromElement(locatorData);
+		expectedData = expectedData.equalsIgnoreCase("{NULL}") || expectedData.equalsIgnoreCase("{EMPTY}") ? "" : expectedData ;
+		
 		if(!this.normaliseString(actualData).equals(this.normaliseString(expectedData))) {
 			throw new SoftAssert("<< Expected and Actual Data don't match >>"+
 								"\nActual Data   : "+ actualData +
