@@ -4,13 +4,14 @@ import java.util.Optional;
 
 public class TestStep {
 
-	String action,locator,testData,reason;
+	String action,locator,testData,reason,stepDescription;
 	TestStatus result;
 	int stepNumber;
 	
 	public TestStep(){
 		reason = "";
-		result = TestStatus.PENDING;
+		stepDescription = "";
+		this.result = TestStatus.PENDING;
 	}
 	public TestStep(TestStep ts) {
 		this.reason = "";
@@ -19,17 +20,30 @@ public class TestStep {
 		this.locator = ts.locator;
 		this.testData = ts.testData;
 		this.stepNumber = ts.stepNumber;
+		this.stepDescription = ts.stepDescription;
 	}
 	
 	public void insertAction(String action) {
 		 this.action = action;
 	 }
+	
 	public void insertLocator(Optional<String> locator) {
 		 this.locator = locator.orElse(null);
 	 }
+	
 	public void insertTestData(Optional<String> testData) {
 		 this.testData = testData.orElse(null);
 	 }
+	
+	public void setStepDescription(Optional<String> description) {
+		String data = description.orElse(this.action + "\t" + this.locator + "\t" + this.testData);
+				//orElse(this.action + "\t" + this.locator + "\t" + this.testData);
+		this.stepDescription = data;
+	}
+	
+	public void updateStepDescription(String replace, String replaceWith) {
+		this.stepDescription = this.stepDescription.replace(replace, replaceWith);
+	}
 	
 	public void setResult(TestStatus result) {
 		 this.result = result;
@@ -44,6 +58,10 @@ public class TestStep {
 		this.stepNumber = stepNumber;
 	}
 	 
+	public String getStepDescription() {
+		return this.stepDescription;
+	}
+	
 	public String getAction() {
 		return action;
 	}

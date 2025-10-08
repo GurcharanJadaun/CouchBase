@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -13,6 +14,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import testManager.TestSuite;
 
@@ -182,5 +185,56 @@ public class XlsxFileManager {
 		return dictionary;
 		
 	}
+	
+	public JSONArray excelSheetToJsonArray(Sheet sheet) {
+		JSONArray jsonArr =  new JSONArray();
+		// Get the first row (the headers)
+        Row headerRow = sheet.getRow(0);
+        
+        // Create an array to store the column headers
+        Iterator<Cell> headerIterator = headerRow.cellIterator();
+        String[] headers = new String[headerRow.getPhysicalNumberOfCells()];
+        int i = 0;
+        
+        while (headerIterator.hasNext()) {
+            headers[i++] = headerIterator.next().getStringCellValue();
+        }
+        
+        for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            JSONObject rowObject = new JSONObject();
+            if(row!=null) {
+            for (int colNum = 0; colNum < headers.length; colNum++) {
+                Cell cell = row.getCell(colNum);
+                
+                String cellValue = this.getCellValueAsString(cell);
+                	rowObject.put(headers[colNum], cellValue);
+               }
+		
+            jsonArr.put(rowObject);
+            }
+	}
+        return jsonArr;
 
+}
+	private String getCellValueAsString(Cell cell) {
+	    if (cell == null) return "";
+
+	    switch (cell.getCellType()) {
+	        case STRING:
+	            return cell.getStringCellValue().trim();
+	        case NUMERIC:
+	            // Handle numeric as String (optionally format it)
+	            return String.valueOf(cell.getNumericCellValue());
+	        case BOOLEAN:
+	            return String.valueOf(cell.getBooleanCellValue());
+	        case FORMULA:
+	            // Optionally evaluate or get as string
+	            return cell.getCellFormula();
+	        case BLANK:
+	            return "";
+	        default:
+	            return "";
+	    }
+	}
 }

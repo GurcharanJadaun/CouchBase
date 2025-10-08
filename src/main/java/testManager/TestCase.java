@@ -44,6 +44,10 @@ public class TestCase{
 		this.reason += reason;
 	}
 	
+	public void setTestCaseReason(String reason) {
+		this.reason += reason;
+	}
+	
 	public String getTestCaseReason() {
 		return this.reason;
 	}
@@ -52,8 +56,18 @@ public class TestCase{
 		return this.result;
 	}
 	
-	public String getTestCaseId( ) {
+	public String getTestCaseId() {
 		return this.testCaseId;
+	}
+	
+	public boolean isTestCaseValid() {
+		
+		steps.forEach(ts -> {
+			if(ts.getResult() == TestStatus.INVALID) {
+				result = TestStatus.INVALID;
+			}
+		});
+		return result != TestStatus.INVALID;
 	}
 	
 
