@@ -15,6 +15,12 @@
 				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
 				"HeadlessBrowser" : "true"
+			},
+			{
+				"BrowserName": "Safari",
+				"ParallelTestExecution": "true",
+				"NumberOfTests":"5",
+				"HeadlessBrowser" : "true"
 			}
 		]
 	}
@@ -22,7 +28,7 @@
 {
 	"ConfigName" : "TestRunner",
 	"RunConfig": {
-		"ParallelBrowserExecution": "false",
+		"ParallelBrowserExecution": "true",
 		"TargetOperatingSystem": "MAC",
 		"TargetBrowsers": [
 			{
@@ -37,7 +43,7 @@
 {
 	"ConfigName" : "WindowsTestRunner",
 	"RunConfig": {
-		"ParallelBrowserExecution": "false",
+		"ParallelBrowserExecution": "true",
 		"TargetOperatingSystem": "Windows",
 		"TargetBrowsers": [
 			{

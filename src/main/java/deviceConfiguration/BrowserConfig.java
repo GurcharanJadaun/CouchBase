@@ -1,5 +1,7 @@
 package deviceConfiguration;
 
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class BrowserConfig {
@@ -7,6 +9,7 @@ public class BrowserConfig {
 	String browserName;
 	int numberOfTests, browserNumber;
 	boolean runTestCasesInParallel, headless;
+	JSONObject testUrlDetails;
 	
 	BrowserConfig(JsonNode browserConfig,int browserNumber){
 		this.browserName = browserConfig.get("BrowserName").asText();
@@ -28,6 +31,9 @@ public class BrowserConfig {
 		}else {
 			this.headless = true;
 		}
+		
+			testUrlDetails = new JSONObject();
+			
 		
 		this.browserNumber = browserNumber;
 	}
@@ -60,8 +66,21 @@ public class BrowserConfig {
 		return this.headless;
 	}
 	
+	/**
+	 * returns the browser index of target browser.
+	 */
 	public int getBrowserSerialNumber() {
 		return this.browserNumber;
+	}
+	
+	public void setTestUrlDetails(JSONObject testUrlDetails) {
+		this.testUrlDetails = testUrlDetails;
+	}
+	/**
+	 * returns URL details for the target browser.
+	 */
+	public JSONObject getTestUrlDetails() {
+		return this.testUrlDetails;
 	}
 
 }
