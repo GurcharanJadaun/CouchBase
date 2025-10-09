@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import FileManager.JsonFileManager;
 
 public class DeviceManager {
 	List<BrowserConfig> browsers;
-	String operatingSystem, deviceConfigFileName;
+	String operatingSystem, deviceConfigName;
 	boolean runTestsOnBrowsersInParallel, isConfigValid;
 
-	public DeviceManager(String deviceConfigFileName) {
-		this.deviceConfigFileName = deviceConfigFileName;
+	public DeviceManager(String deviceConfigName) {
+		this.deviceConfigName = deviceConfigName;
 		isConfigValid = true;
 		browsers = new ArrayList<BrowserConfig>();
 	}
@@ -48,7 +50,7 @@ public class DeviceManager {
 		try {
 			
 			JsonFileManager config = new JsonFileManager();
-			Iterator<JsonNode> listOfConfigs = config.getItemsFromJson(deviceConfigFileName);
+			Iterator<JsonNode> listOfConfigs = config.getItemsFromJson(deviceConfigName);
 			
 			while(listOfConfigs.hasNext()) {
 				JsonNode item = listOfConfigs.next();
@@ -74,7 +76,7 @@ public class DeviceManager {
 	 * 
 	 * @param "configName" to be used for testing.
 	 */
-	public void getBrowserDetailsFromJson(String configName) {
+	public void setupBrowserForDevice(String configName) {
 		
 		JsonNode shortListedConfig = this.getTestRunnerConfig(configName);
 		if(shortListedConfig != null) {
@@ -100,5 +102,19 @@ public class DeviceManager {
 			System.out.println("Config Name '" + configName+"' not available in DeviceConfig.JSON");
 		}
 		
+		
+	}
+	/**
+	 * Assigns Browser Details to the list of BrowserConfig from the JSON Array filtered by "ConfigName" parameter 
+	 * & setup test environment details for each browser
+	 * 
+	 * @param "configName" to be used for testing.
+	 * @param "testEnvConfig" contains env details like browser url, username and password
+	 */
+	public void setupBrowserForDevice(String configName,JSONObject testEnvConfig) {
+		this.setupBrowserForDevice(configName);
+		this.browsers.forEach(browser -> {
+			browser.setTestUrlDetails(testEnvConfig);
+		});
 	}
 }

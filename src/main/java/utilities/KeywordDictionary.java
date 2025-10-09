@@ -3,12 +3,15 @@ package utilities;
 import java.text.Normalizer;
 import java.util.Optional;
 
+import org.json.JSONObject;
+
 import TestExceptions.SoftAssert;
 import deviceConfiguration.BrowserConfig;
 
 public class KeywordDictionary  {
 	BrowserKeeper browser;
 	BrowserConfig browserConfig;
+	JSONObject testUrlDetails;
 	
 	
 	public KeywordDictionary(Optional<BrowserConfig> browserConfig){
@@ -17,7 +20,15 @@ public class KeywordDictionary  {
 	
 
 	public void openBrowser(String param) {
-		browser = new BrowserKeeper();
+		this.testUrlDetails = browserConfig.getTestUrlDetails();
+		if(this.testUrlDetails.get("UserName").toString().length() > 0) {
+			String userName = this.testUrlDetails.get("UserName").toString();
+			String password = this.testUrlDetails.get("Password").toString();
+			browser = new BrowserKeeper(userName,password);
+		}else {
+			browser = new BrowserKeeper();
+		}
+		
 		if(param.equalsIgnoreCase("deviceConfig.browser")) {
 			param = browserConfig.getBrowserName();
 		}
@@ -35,6 +46,14 @@ public class KeywordDictionary  {
 	}
 	
 	public void gotoUrl(String url) {
+		String[] details = url.split("\\+");
+		url = "";
+		for(String data : details) {
+			if(data.equalsIgnoreCase("{BaseURL}")) {
+				data = testUrlDetails.get("Base Url").toString();
+			}
+			url = url + data;
+		}
 		browser.openUrl(url);
 	}
 	

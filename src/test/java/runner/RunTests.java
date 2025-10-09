@@ -10,12 +10,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.json.JSONObject;
+
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import TestReports.TestReports;
 import deviceConfiguration.BrowserConfig;
 import deviceConfiguration.DeviceManager;
 import loader.TestSuiteLoader;
+import testEnvironmentConfig.TestEnvironmentConfig;
 import testManager.TestCase;
 import testManager.TestStatus;
 import testManager.TestStep;
@@ -32,9 +35,11 @@ public class RunTests {
 		
 		loadTests.setupTest();
 		
-		
+		TestEnvironmentConfig testEnvConfig= new TestEnvironmentConfig("TestURLConfig");
+		JSONObject urlDetails= testEnvConfig.getTestEnvConfigFromJson("Product");
 		DeviceManager device = new DeviceManager("DeviceConfig");
-		device.getBrowserDetailsFromJson("MacParallelTestRunner");
+		device.setupBrowserForDevice("MacParallelTestRunner",urlDetails);
+		
 		
 		RunTests runner = new RunTests();
 		if(device.runTestsOnBrowsersInParallel()) {
@@ -167,14 +172,14 @@ public class RunTests {
 				} else {
 					// code to skip beforeEachTestCases here
 					testSuite.getBeforeEachTest().forEach(tc -> {
-						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeEach, afterEach) failure >>");
 					});
 				}
 
 				if (flag) {
 					this.runTestCase(testCase, caseNode, ex);
 				} else {
-					this.skipTestCase(testCase, caseNode, "<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+					this.skipTestCase(testCase, caseNode, "<< skipping tests due to Hook (beforeEach, afterEach) failure >>");
 				}
 
 				if (flag) {
@@ -183,11 +188,19 @@ public class RunTests {
 				} else {
 					// skip afterEachTestCases here
 					testSuite.getAfterEachTest().forEach(tc -> {
-						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
+						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeEach, afterEach) failure >>");
 					});
 				}
-				
 				this.cleanUp(ex);
+				//set reliability of hook test to true if test passes even once successfully. 
+				if(testCase.hasTestCasePassed() && !testSuite.isHookTestReliable()) {
+					testSuite.setHookTestReliablity();
+				}
+				//resets hook status if test case hasn't passed and test hooks are reliable
+				if(!testCase.hasTestCasePassed() && testSuite.isHookTestReliable()) {
+					testSuite.resetHookTestStatus();
+					flag = true;
+				}
 			}
 
 //		if (flag) {
@@ -212,7 +225,7 @@ public class RunTests {
 		while (it.hasNext()) {
 			TestStep ts = it.next();
 			if (testCase.getTestCaseResult().isFailed()) {
-				this.skipStep(ts,testCaseNode ,">> Skipped because of error above<< ");
+				this.skipStep(ts,testCaseNode ,">> Skipped because of error in " + testCase.getTestCaseId() + " <<");
 			} else {
 				runTestStep(ts, testCaseNode, ex);
 

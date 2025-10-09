@@ -60,6 +60,10 @@ public class TestCase{
 		return this.testCaseId;
 	}
 	
+	public boolean hasTestCasePassed() {
+		return this.result == TestStatus.PASSED;
+	}
+	
 	public boolean isTestCaseValid() {
 		
 		steps.forEach(ts -> {

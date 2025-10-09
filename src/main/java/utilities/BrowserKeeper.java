@@ -3,6 +3,7 @@ package utilities;
 import java.util.Arrays;
 
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.options.HttpCredentials;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.SelectOption;
 
@@ -10,6 +11,19 @@ public class BrowserKeeper {
 	Browser browser;
 	Page page;
 	Playwright playwright;
+	BrowserContext context;
+	Browser.NewContextOptions contextOptions;
+	
+	public BrowserKeeper(){
+		contextOptions = new Browser.NewContextOptions();
+	}
+	
+	public BrowserKeeper(String username, String password){
+		contextOptions = new Browser.NewContextOptions()
+				.setHttpCredentials(new HttpCredentials(username, password));
+	}
+	
+
 
 	@SuppressWarnings("unused")
 	public void initiateBrowser(String browserName) {
@@ -20,24 +34,26 @@ public class BrowserKeeper {
 			browser = playwright.chromium().launch(
 					new BrowserType.LaunchOptions().setHeadless(false).setArgs(Arrays.asList("--start-maximized")));
 			// it removes the fixed viewport (seems like rendering issue is there with fixed 1280×720 option as Accept
-			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
+			contextOptions.setViewportSize(null);
+			
 
 		} else if (browserName.equalsIgnoreCase("edge")) {
 			browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setChannel("msedge")
 					.setHeadless(false).setArgs(Arrays.asList("--start-maximized")));
-			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
+			contextOptions.setViewportSize(null);
+		
 		} else if (browserName.equalsIgnoreCase("firefox")) {
 			browser = playwright.firefox().launch(
 					new BrowserType.LaunchOptions().setHeadless(false).setArgs(Arrays.asList("--start-maximized")));
-			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(null));
+			contextOptions.setViewportSize(null);
 
 		} else if (browserName.equalsIgnoreCase("safari")) {
 			browser = playwright.webkit().launch(new BrowserType.LaunchOptions().setHeadless(false));
-			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(1920,1080));
+			contextOptions.setViewportSize(1920,1080);
 		}
 
 		// cookies option isn't available)
-		
+		context = browser.newContext(contextOptions);
 
 		// Adds the tab on the browser
 		page = context.newPage();
@@ -46,7 +62,7 @@ public class BrowserKeeper {
 
 	public void initiateHeadlessBrowser(String browserName) {
 		playwright = Playwright.create();
-		BrowserContext context = null;
+		context = null;
 		if (browserName.equalsIgnoreCase("chrome")) {
 			// ensures browser works in headless state
 			browser = playwright.chromium()
@@ -54,31 +70,27 @@ public class BrowserKeeper {
 							.setArgs(java.util.Arrays.asList("--headless=new",
 									"--disable-blink-features=AutomationControlled", "--disable-gpu", "--no-sandbox",
 									"--disable-dev-shm-usage")));
-			context = browser.newContext(new Browser.NewContextOptions().setUserAgent(
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
-					// .setViewportSize(1280, 720));
-					.setViewportSize(null));
+			
+			contextOptions.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36");
+			contextOptions.setViewportSize(null);
 		} else if (browserName.equalsIgnoreCase("edge")) {
 			browser = playwright.chromium()
 					.launch(new BrowserType.LaunchOptions().setChannel("msedge").setHeadless(true).setArgs(
 							java.util.Arrays.asList("--headless=new", "--no-sandbox", "--headless", "--disable-gpu")));
-			context = browser.newContext(new Browser.NewContextOptions().setUserAgent(
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
-					// .setViewportSize(1280, 720));
-					.setViewportSize(null));
+			contextOptions.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36");
+			contextOptions.setViewportSize(null);
 		} else if (browserName.equalsIgnoreCase("firefox")) {
 			browser = playwright.firefox().launch(new BrowserType.LaunchOptions().setHeadless(true));
-			context = browser.newContext(new Browser.NewContextOptions().setUserAgent(
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36")
-					// .setViewportSize(1280, 720));
-					.setViewportSize(null));
+			contextOptions.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36");
+			contextOptions.setViewportSize(null);
+			
 		}
 		else if (browserName.equalsIgnoreCase("safari")) {
 			browser = playwright.webkit().launch(new BrowserType.LaunchOptions().setHeadless(true));
-			context = browser.newContext(new Browser.NewContextOptions().setViewportSize(1920,1080));
+			contextOptions.setViewportSize(1920,1080);
 		}
 
-		
+		context = browser.newContext(contextOptions);
 		// Adds the tab on the browser
 		page = context.newPage();
 		this.movePageToTackleLazyLoad();

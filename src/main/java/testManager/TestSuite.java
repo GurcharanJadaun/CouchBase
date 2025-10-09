@@ -11,6 +11,7 @@ public class TestSuite {
 	String suiteName;
 	List<TestCase> testSuite, beforeAllTests, beforeEachTest, afterAllTests, afterEachTest;
 	TestStatus isTestSuiteValid;
+	boolean isHookTestReliable;
 
 	public TestSuite(List<TestCase> listOfTestCases) {
 		this.testSuite = listOfTestCases;
@@ -26,6 +27,7 @@ public class TestSuite {
 		this.afterEachTest = new ArrayList<TestCase>();
 
 		this.isTestSuiteValid = TestStatus.PENDING;
+	    this.isHookTestReliable = false;
 
 	}
 
@@ -33,6 +35,7 @@ public class TestSuite {
 	public TestSuite(TestSuite suite) {
 		this.suiteName = suite.suiteName;
 		this.isTestSuiteValid = suite.isTestSuiteValid;
+	    this.isHookTestReliable = suite.isHookTestReliable;
 
 		this.testSuite = new ArrayList<TestCase>();
 		this.beforeAllTests = new ArrayList<TestCase>();
@@ -251,6 +254,39 @@ public class TestSuite {
 	 */
 	public boolean isTestSuiteValid() {
 		return !(this.isTestSuiteValid == TestStatus.INVALID);
+	}
+
+	public void setHookTestReliablity() {
+		isHookTestReliable = true;
+		for (TestCase tc : this.beforeEachTest) {
+			if (!tc.hasTestCasePassed()) {
+				isHookTestReliable = false;
+				break;
+			}
+		}
+
+		for (TestCase tc : this.afterEachTest) {
+			if (!tc.hasTestCasePassed()) {
+				isHookTestReliable = false;
+				break;
+			}
+		}
+
+	}
+
+	public boolean isHookTestReliable() {
+		return this.isHookTestReliable;
+	}
+	
+	public void resetHookTestStatus() {
+		this.beforeEachTest.forEach(
+				testCase -> {
+					testCase.setTestCaseResult(TestStatus.PENDING);
+				});
+		this.afterEachTest.forEach(
+				testCase -> {
+					testCase.setTestCaseResult(TestStatus.PENDING);
+				});
 	}
 
 }
