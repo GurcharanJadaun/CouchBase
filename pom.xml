@@ -65,6 +65,8 @@
                 <arguments>
                     <argument>--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</argument>
                     <argument>--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</argument>
+                      <argument>-DtestEnv=${testEnv}</argument> 
+                      <argument>-DdeviceConfig=${deviceConfig}</argument> 
                 </arguments>
             </configuration>
         </execution>

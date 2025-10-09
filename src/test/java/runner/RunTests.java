@@ -31,14 +31,17 @@ public class RunTests {
 	public static void main(String args[]) {
 		Instant start = Instant.now();
 		TestSuiteLoader loadTests= new TestSuiteLoader();
+		String urlConfig = System.getProperty("testEnv","Product");
+		String deviceConfig = System.getProperty("deviceConfig","MacParallelTestRunner");
+		
 		
 		
 		loadTests.setupTest();
 		
 		TestEnvironmentConfig testEnvConfig= new TestEnvironmentConfig("TestURLConfig");
-		JSONObject urlDetails= testEnvConfig.getTestEnvConfigFromJson("Product");
+		JSONObject urlDetails= testEnvConfig.getTestEnvConfigFromJson(urlConfig);
 		DeviceManager device = new DeviceManager("DeviceConfig");
-		device.setupBrowserForDevice("MacParallelTestRunner",urlDetails);
+		device.setupBrowserForDevice(deviceConfig,urlDetails);
 		
 		
 		RunTests runner = new RunTests();
@@ -55,7 +58,7 @@ public class RunTests {
 		long seconds = timeElapsed.toSeconds();
 		double minutes = timeElapsed.toMinutes();
 		System.out.println("Time taken: " + seconds + " seconds (" + minutes + " minutes)");
-
+	
 		System.exit(0);
 	}
 	
