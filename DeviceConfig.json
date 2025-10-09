@@ -26,30 +26,25 @@
 	}
 },
 {
-	"ConfigName" : "TestRunner",
-	"RunConfig": {
-		"ParallelBrowserExecution": "true",
-		"TargetOperatingSystem": "MAC",
-		"TargetBrowsers": [
-			{
-				"BrowserName": "Safari",
-				"ParallelTestExecution": "true",
-				"NumberOfTests":"5",
-				"HeadlessBrowser" : "true"
-			}
-		]
-	}
-},
-{
 	"ConfigName" : "WindowsTestRunner",
 	"RunConfig": {
 		"ParallelBrowserExecution": "true",
 		"TargetOperatingSystem": "Windows",
 		"TargetBrowsers": [
 			{
-				"BrowserName": "Chrome"
+				"BrowserName": "Chrome",
+				"ParallelTestExecution": "true",
+				"NumberOfTests":"5",
+				"HeadlessBrowser" : "true"
+			},
+			{
+				"BrowserName": "Firefox",
+				"ParallelTestExecution": "true",
+				"NumberOfTests":"5",
+				"HeadlessBrowser" : "true"
 			}
 		]
+
 	}
 }
 ]
