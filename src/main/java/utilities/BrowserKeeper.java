@@ -15,14 +15,10 @@ public class BrowserKeeper {
 	Browser.NewContextOptions contextOptions;
 	
 	public BrowserKeeper(){
-		System.out.println("------ Testing Prod env ------");
 		contextOptions = new Browser.NewContextOptions();
 	}
 	
 	public BrowserKeeper(String username, String password){
-		System.out.println("------ Testing Staging env ------");
-		System.out.println("User     : " + username);
-		System.out.println("Password : " + password);
 		contextOptions = new Browser.NewContextOptions()
 				.setHttpCredentials(new HttpCredentials(username, password));
 	}

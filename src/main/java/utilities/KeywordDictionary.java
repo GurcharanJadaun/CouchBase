@@ -54,7 +54,6 @@ public class KeywordDictionary  {
 			}
 			url = url + data;
 		}
-		System.out.println("Going to Url >> "+url);
 		browser.openUrl(url);
 	}
 	
