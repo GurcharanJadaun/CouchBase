@@ -8,7 +8,7 @@ public class BrowserConfig {
 	
 	String browserName;
 	int numberOfTests, browserNumber;
-	boolean runTestCasesInParallel, headless;
+	boolean runTestCasesInParallel, headless, retryFailedTestCases;
 	JSONObject testUrlDetails;
 	
 	BrowserConfig(JsonNode browserConfig,int browserNumber){
@@ -30,6 +30,12 @@ public class BrowserConfig {
 			this.headless = browserConfig.get("HeadlessBrowser").asBoolean();
 		}else {
 			this.headless = true;
+		}
+		
+		if (browserConfig.hasNonNull("RetryFailedTestCases")) {
+			this.retryFailedTestCases = browserConfig.get("RetryFailedTestCases").asBoolean();
+		}else {
+			this.retryFailedTestCases = true;
 		}
 		
 			testUrlDetails = new JSONObject();
@@ -81,6 +87,10 @@ public class BrowserConfig {
 	 */
 	public JSONObject getTestUrlDetails() {
 		return this.testUrlDetails;
+	}
+	
+	public boolean retryFailedTestCase() {
+		return this.retryFailedTestCases;
 	}
 
 }

@@ -163,7 +163,24 @@ public class RunTests {
 				ExecuteStep ex = new ExecuteStep(deviceConfig);
 				report[browserDetails.getBrowserSerialNumber()].fireAddTestCaseEvent(testCase, testSuite);
 				
-					this.runTestCase(testCase, ex);
+				this.runTestCase(testCase, ex);
+				
+				System.out.println("Test Case Status  : "+testCase.getTestCaseResult());
+				System.out.println("Test Case result  : "+testCase.getTestCaseResult().isFailed());
+				System.out.println("Test case retry   : "+browserDetails.retryFailedTestCase());
+				
+				if(testCase.getTestCaseResult().isFailed() && browserDetails.retryFailedTestCase()) {
+					System.out.println("<< Retrying failed test case >>");
+					this.cleanUp(ex);
+					TestCase retryTestCase = new TestCase(testCase); 
+					String testName = testCase.getTestCaseId();
+					
+					retryTestCase.insertTestCaseId("Retry > "+testName);
+					report[browserDetails.getBrowserSerialNumber()].fireAddTestCaseEvent(retryTestCase, testSuite);
+					
+					ex = new ExecuteStep(deviceConfig);
+					this.runTestCase(retryTestCase, ex);
+				}
 			
 				this.cleanUp(ex);
 				}

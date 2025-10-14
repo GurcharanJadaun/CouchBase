@@ -32,10 +32,10 @@
 		"TargetOperatingSystem": "MAC",
 		"TargetBrowsers": [
 			{
-				"BrowserName": "Safari",
+				"BrowserName": "Chrome",
 				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
-				"HeadlessBrowser" : "true"
+				"HeadlessBrowser" : "false"
 			}
 		]
 	}

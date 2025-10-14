@@ -22,6 +22,7 @@ public class ReportTestListener implements TestListener {
 	public void addTestSuite(TestSuite testSuite) {
 		ExtentTest node = this.report.createTest(testSuite.getSuiteName());
 		testSuite.createTestSuiteNode(node);
+		
 	}
 	
 	@Override

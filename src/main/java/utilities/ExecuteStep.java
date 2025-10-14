@@ -25,7 +25,7 @@ public class ExecuteStep {
 		screenshot = null;
 		this.flush();
 	}
-	
+
 	public void flush() {
 		keywordDictionaryClass = keyword.getClass();
 		result = TestStatus.PASSED;
@@ -48,8 +48,8 @@ public class ExecuteStep {
 				// add logs here for exception to execute the
 				this.setResultForException(e);
 			}
-			//Thread.sleep(250);
-		} catch ( Exception e) {
+			// Thread.sleep(250);
+		} catch (Exception e) {
 			// add logs here for failing to locate method in Keyword Class.
 			this.setResultForException(e);
 		}
@@ -75,7 +75,7 @@ public class ExecuteStep {
 				// add logs here for exception to execute the
 				this.setResultForException(e);
 			}
-			//Thread.sleep(250);
+			// Thread.sleep(250);
 		} catch (NoSuchMethodException | SecurityException e) {
 			// add logs here for failing to locate method in Keyword Class.
 			this.setResultForException(e);
@@ -98,7 +98,7 @@ public class ExecuteStep {
 				// add logs here for exception to execute the
 				this.setResultForException(e);
 			}
-			//Thread.sleep(250);
+			// Thread.sleep(250);
 		} catch (NoSuchMethodException | SecurityException e) {
 			// add logs here for failing to locate method in Keyword Class.
 			this.setResultForException(e);
@@ -107,32 +107,34 @@ public class ExecuteStep {
 			this.setResultForException(e);
 		}
 	}
-	
+
 	@SuppressWarnings("static-access")
 	void takeScreenshot() {
 		try {
-		byte[] screenshotBytes = this.keyword.takeScreenshot();
-		this.screenshot = this.screenshotBuilder.createScreenCaptureFromBase64String(java.util.Base64.getEncoder().encodeToString(screenshotBytes)).build();
-		}catch(Exception ex) {
+			byte[] screenshotBytes = this.keyword.takeScreenshot();
+			this.screenshot = this.screenshotBuilder
+					.createScreenCaptureFromBase64String(java.util.Base64.getEncoder().encodeToString(screenshotBytes))
+					.build();
+		} catch (Exception ex) {
 			System.out.print("<<<<<<< Screenshot Not Taken >>>>>");
 			this.screenshot = null;
 		}
 	}
 
 	void setResultForException(Exception ex) {
-		
+
 		this.takeScreenshot();
-		
-		if(ex.getCause()==null) {
-		this.reason = ex.toString();	
-		this.result = TestStatus.STOP_EXECUTION;
-		}
-		else{
-		this.reason = ex.getCause().toString();
-		if (reason.contains("SoftAssert")) {
-			this.result = TestStatus.FAILED;
+
+		if (ex.getCause() == null) {
+			this.reason = ex.toString();
+			this.result = TestStatus.STOP_EXECUTION;
 		} else {
-			result = TestStatus.STOP_EXECUTION;
-		}}
+			this.reason = ex.getCause().toString();
+			if (reason.contains("SoftAssert")) {
+				this.result = TestStatus.FAILED;
+			} else {
+				result = TestStatus.STOP_EXECUTION;
+			}
+		}
 	}
 }
