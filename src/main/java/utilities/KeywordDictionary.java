@@ -14,8 +14,8 @@ public class KeywordDictionary  {
 	JSONObject testUrlDetails;
 	
 	
-	public KeywordDictionary(Optional<BrowserConfig> browserConfig){
-		this.browserConfig = browserConfig.orElse(null);
+	public KeywordDictionary(BrowserConfig browserConfig){
+		this.browserConfig = browserConfig;
 	}
 	
 

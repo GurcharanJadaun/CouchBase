@@ -6,58 +6,46 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.aventstack.extentreports.ExtentTest;
+
 public class TestSuite {
 
 	String suiteName;
-	List<TestCase> testSuite, beforeAllTests, beforeEachTest, afterAllTests, afterEachTest;
+	List<TestCase> testSuite;
+	TestCase beforeEachTest, afterEachTest;
 	TestStatus isTestSuiteValid;
-	boolean isHookTestReliable;
+	ExtentTest suiteNode;
 
 	public TestSuite(List<TestCase> listOfTestCases) {
 		this.testSuite = listOfTestCases;
 		this.isTestSuiteValid = TestStatus.PENDING;
-
+		this.beforeEachTest = new TestCase();
+		this.afterEachTest = new TestCase();
 	}
 
 	public TestSuite() {
 		this.testSuite = new ArrayList<TestCase>();
-		this.beforeAllTests = new ArrayList<TestCase>();
-		this.beforeEachTest = new ArrayList<TestCase>();
-		this.afterAllTests = new ArrayList<TestCase>();
-		this.afterEachTest = new ArrayList<TestCase>();
+		this.beforeEachTest = new TestCase();
+		this.afterEachTest = new TestCase();
 
 		this.isTestSuiteValid = TestStatus.PENDING;
-	    this.isHookTestReliable = false;
-
 	}
 
 	// deep copy values of test suite
 	public TestSuite(TestSuite suite) {
 		this.suiteName = suite.suiteName;
 		this.isTestSuiteValid = suite.isTestSuiteValid;
-	    this.isHookTestReliable = suite.isHookTestReliable;
+		this.suiteNode = null;
 
 		this.testSuite = new ArrayList<TestCase>();
-		this.beforeAllTests = new ArrayList<TestCase>();
-		this.beforeEachTest = new ArrayList<TestCase>();
-		this.afterAllTests = new ArrayList<TestCase>();
-		this.afterEachTest = new ArrayList<TestCase>();
+		this.beforeEachTest = new TestCase();
+		this.afterEachTest = new TestCase();
 
 		for (TestCase tc : suite.testSuite) {
 			this.testSuite.add(new TestCase(tc));
 		}
-		for (TestCase tc : suite.beforeAllTests) {
-			this.beforeAllTests.add(new TestCase(tc));
-		}
-		for (TestCase tc : suite.beforeEachTest) {
-			this.beforeEachTest.add(new TestCase(tc));
-		}
-		for (TestCase tc : suite.afterAllTests) {
-			this.afterAllTests.add(new TestCase(tc));
-		}
-		for (TestCase tc : suite.afterEachTest) {
-			this.afterEachTest.add(new TestCase(tc));
-		}
+		this.beforeEachTest = new TestCase(suite.beforeEachTest);
+		this.beforeEachTest = new TestCase(suite.afterEachTest);
 
 	}
 
@@ -88,34 +76,18 @@ public class TestSuite {
 	}
 
 	/**
-	 * returns List<TestCase> from the test suite. These are the list of test cases
-	 * which should be executed before all test cases in test suite.
+	 * returns beforeEachTest hook TestCase from the test suite. This is the test
+	 * case which should be executed before each test case in test suite.
 	 */
-	public List<TestCase> getBeforeAllTests() {
-		return this.beforeAllTests;
-	}
-
-	/**
-	 * returns List<TestCase> from the test suite. These are the list of test cases
-	 * which should be executed after all test cases in test suite.
-	 */
-	public List<TestCase> getAfterAllTests() {
-		return this.afterAllTests;
-	}
-
-	/**
-	 * returns List<TestCase> from the test suite. These are the list of test cases
-	 * which should be executed before each test case in test suite.
-	 */
-	public List<TestCase> getBeforeEachTest() {
+	public TestCase getBeforeEachTest() {
 		return this.beforeEachTest;
 	}
 
 	/**
-	 * returns List<TestCase> from the test suite. These are the list of test cases
-	 * which should be executed after each test case in test suite.
+	 * returns afterEachTest hook TestCase from the test suite. This is the test
+	 * case which should be executed after each test case in test suite.
 	 */
-	public List<TestCase> getAfterEachTest() {
+	public TestCase getAfterEachTest() {
 		return this.afterEachTest;
 	}
 
@@ -159,35 +131,30 @@ public class TestSuite {
 	}
 
 	/**
-	 * extracts "before all" test cases from the test suite.
+	 * returns List of TestCases from the test suite.
 	 */
-	public void extractBeforeAllMethodFromTestSuite() {
-		this.beforeAllTests = this.getTestCasesById("beforeAll");
-		this.testSuite.removeAll(this.beforeAllTests);
+	public Optional<TestCase> getTestCaseById(String testCaseId) {
+		Optional<TestCase> tc = null;
+
+		tc = testSuite.stream().filter(testCase -> testCase.getTestCaseId().equalsIgnoreCase(testCaseId)).findFirst();
+
+		return tc;
 	}
 
 	/**
 	 * extracts "before each" test cases from the test suite.
 	 */
 	public void extractBeforeEachMethodFromTestSuite() {
-		this.beforeEachTest = this.getTestCasesById("beforeEach");
-		this.testSuite.removeAll(beforeEachTest);
-	}
-
-	/**
-	 * extracts "after all" test cases from the test suite.
-	 */
-	public void extractAfterAllMethodFromTestSuite() {
-		this.afterAllTests = this.getTestCasesById("afterAll");
-		this.testSuite.removeAll(this.afterAllTests);
+		this.beforeEachTest = this.getTestCaseById("beforeEach").orElse(new TestCase());
+		this.testSuite.remove(beforeEachTest);
 	}
 
 	/**
 	 * extracts "after each" test cases from the test suite.
 	 */
 	public void extractAfterEachMethodFromTestSuite() {
-		this.afterEachTest = this.getTestCasesById("afterEach");
-		this.testSuite.removeAll(this.afterEachTest);
+		this.afterEachTest = this.getTestCaseById("afterEach").orElse(new TestCase());
+		this.testSuite.remove(afterEachTest);
 	}
 
 	/**
@@ -226,10 +193,7 @@ public class TestSuite {
 	 */
 	public boolean suiteContainsHooks() {
 		boolean result = true;
-
-		result = this.getTestCasesById("beforeEach").size() > 0 || this.getTestCasesById("afterEach").size() > 0
-				|| this.getTestCasesById("afterAll").size() > 0 || this.getTestCasesById("beforeAll").size() > 0;
-
+		result = this.beforeEachTest.steps.size() == 0 || this.afterEachTest.steps.size() == 0;
 		return result;
 	}
 
@@ -256,37 +220,45 @@ public class TestSuite {
 		return !(this.isTestSuiteValid == TestStatus.INVALID);
 	}
 
-	public void setHookTestReliablity() {
-		isHookTestReliable = true;
-		for (TestCase tc : this.beforeEachTest) {
-			if (!tc.hasTestCasePassed()) {
-				isHookTestReliable = false;
-				break;
-			}
-		}
+	/**
+	 * add hooks (test steps) to all the test cases
+	 */
+	public void addHooksToTestCases() {
+		for (int index = 0; index < this.testSuite.size(); index++) {
+			TestCase testCase = testSuite.get(index);
+			TestCase tmp = new TestCase();
 
-		for (TestCase tc : this.afterEachTest) {
-			if (!tc.hasTestCasePassed()) {
-				isHookTestReliable = false;
-				break;
-			}
+			tmp.caseNode = testCase.caseNode;
+			tmp.reason = testCase.reason;
+			tmp.result = testCase.result;
+			tmp.testCaseId = testCase.testCaseId;
+
+			tmp.addSteps(this.beforeEachTest.steps);
+			tmp.addSteps(testCase.steps);
+			tmp.addSteps(this.afterEachTest.steps);
+
+			this.testSuite.set(index, tmp);
 		}
 
 	}
 
-	public boolean isHookTestReliable() {
-		return this.isHookTestReliable;
+	public ExtentTest getTestSuiteNode() {
+		return this.suiteNode;
 	}
-	
-	public void resetHookTestStatus() {
-		this.beforeEachTest.forEach(
-				testCase -> {
-					testCase.setTestCaseResult(TestStatus.PENDING);
-				});
-		this.afterEachTest.forEach(
-				testCase -> {
-					testCase.setTestCaseResult(TestStatus.PENDING);
-				});
+
+	/**
+	 * Stores ExtentTest instance to be used as suite node by the listener
+	 */
+	public void createTestSuiteNode(ExtentTest suiteNode) {
+		this.suiteNode = suiteNode;
+	}
+	/**
+	 * Extracts hooks from the imported test suite.
+	 */
+	public void extractHooks() {
+		this.extractAfterEachMethodFromTestSuite();
+		this.extractBeforeEachMethodFromTestSuite();
+
 	}
 
 }

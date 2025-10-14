@@ -17,9 +17,11 @@ public class ExecuteStep {
 	public String reason;
 	private MediaEntityBuilder screenshotBuilder;
 	public Media screenshot;
+	public BrowserConfig browserConfig;
 
-	public ExecuteStep(Optional<BrowserConfig> deviceConfig) {
-		keyword = new KeywordDictionary(deviceConfig);
+	public ExecuteStep(BrowserConfig browserConfig) {
+		this.browserConfig = browserConfig;
+		keyword = new KeywordDictionary(browserConfig);
 		screenshot = null;
 		this.flush();
 	}
