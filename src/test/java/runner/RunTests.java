@@ -12,9 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 
-import com.aventstack.extentreports.ExtentReports;
-import com.aventstack.extentreports.ExtentTest;
-import TestReports.TestReports;
+import TestReports.ReportTestEventManager;
+import TestReports.ReportTestListener;
 import deviceConfiguration.BrowserConfig;
 import deviceConfiguration.DeviceManager;
 import loader.TestSuiteLoader;
@@ -26,15 +25,13 @@ import testManager.TestSuite;
 import utilities.ExecuteStep;
 
 public class RunTests {
-	ExtentReports[] reports;
+	ReportTestEventManager[] report;
 	
 	public static void main(String args[]) {
 		Instant start = Instant.now();
 		TestSuiteLoader loadTests= new TestSuiteLoader();
 		String urlConfig = System.getProperty("testEnv","Product");
-		String deviceConfig = System.getProperty("deviceConfig","MacParallelTestRunner");
-		
-		
+		String deviceConfig = System.getProperty("deviceConfig","TestRunner");
 		
 		loadTests.setupTest();
 		
@@ -43,14 +40,12 @@ public class RunTests {
 		DeviceManager device = new DeviceManager("DeviceConfig");
 		device.setupBrowserForDevice(deviceConfig,urlDetails);
 		
-		
 		RunTests runner = new RunTests();
 		if(device.runTestsOnBrowsersInParallel()) {
 		runner.testBrowsersInParallel(device, loadTests.listOfTestSuites);}
 		else {
 		runner.testBrowsersSequentially(device, loadTests.listOfTestSuites);	
 		}
-		
 			
 		Instant end = Instant.now();
 		Duration timeElapsed = Duration.between(start, end);
@@ -63,13 +58,15 @@ public class RunTests {
 	}
 	
 	public void testBrowsersSequentially(DeviceManager device, List<TestSuite> testSuites) {
-		reports = new ExtentReports[device.getBrowserList().size()];
+		report = new ReportTestEventManager[device.getBrowserList().size()];
+		System.out.println("Number of suites to run  : " + testSuites.size());
+		
 		device.getBrowserList().forEach(browser -> {
-			reports[browser.getBrowserSerialNumber()] = new ExtentReports(); // creates fresh report for each browser
+			report[browser.getBrowserSerialNumber()] = new ReportTestEventManager();
+			report[browser.getBrowserSerialNumber()].addTestListener(new ReportTestListener()); // creates fresh report for each browser
 			this.testSuiteSequential(testSuites, browser);
 			Optional<String> suffix = Optional.ofNullable(browser.getBrowserName()+" ");
-			new TestReports().createTestReport(this.reports[browser.getBrowserSerialNumber()] , suffix);
-	
+			report[browser.getBrowserSerialNumber()].fireFinishTest(suffix);
 		});
 	
 
@@ -78,11 +75,13 @@ public class RunTests {
 	public void testBrowsersInParallel(DeviceManager device, List<TestSuite> testSuites) {
 		// do this later
 		int numberOfThreads = device.getBrowserList().size();
-		reports = new ExtentReports[numberOfThreads];
 		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+		report = new ReportTestEventManager[device.getBrowserList().size()];
+		System.out.println("Number of suites to run  : " + testSuites.size());
 		
 		for (BrowserConfig browser : device.getBrowserList()) {
-			reports[browser.getBrowserSerialNumber()] = new ExtentReports(); // creates fresh report for each browser
+			report[browser.getBrowserSerialNumber()] = new ReportTestEventManager();
+			report[browser.getBrowserSerialNumber()].addTestListener(new ReportTestListener()); // creates fresh report for each browser
 			executor.submit(()-> testSuiteSequential(testSuites, browser));
 		}
 		
@@ -93,12 +92,13 @@ public class RunTests {
 		    }
 		} catch (InterruptedException e) {
 		    executor.shutdownNow();
+		    e.printStackTrace();
 		    Thread.currentThread().interrupt();
 		}finally{
 
 			for (BrowserConfig browser : device.getBrowserList()) {
 				Optional<String> suffix = Optional.ofNullable(browser.getBrowserName()+" ");
-				new TestReports().createTestReport(this.reports[browser.getBrowserSerialNumber()] , suffix);
+				report[browser.getBrowserSerialNumber()].fireFinishTest(suffix);
 			}
 		}
 		
@@ -109,39 +109,36 @@ public class RunTests {
 			TestSuite suite = (new TestSuite(testSuite));
 		
 		System.out.println("---------" + browser.getBrowserName() + "----------");
-		ExtentTest suiteNode = this.reports[browser.getBrowserSerialNumber()].createTest(suite.getSuiteName());
+		report[browser.getBrowserSerialNumber()].fireCreateTestSuite(suite);
 		
-		this.extractHooks(suite);
-		
+		suite.extractHooks();
+		suite.addHooksToTestCases();
 		
 		if(browser.runTestsInParallel()) {
-		this.testCaseInParallel(suite,suiteNode,browser);}
+		this.testCaseInParallel(suite,browser);}
 		else {
-		this.runTestSuite(suite, suiteNode, browser);	
+		this.runTestSuite(suite, browser);	
 		}
 	}
 	}
 	
- 	private void testCaseInParallel(TestSuite testSuite, ExtentTest suiteNode, BrowserConfig browserDetails) {
+ 	private void testCaseInParallel(TestSuite testSuite, BrowserConfig browserDetails) {
 		int numberOfThreads = browserDetails.getCountOfNumberOfTests();
-
 		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 		
 		for (TestCase testCase : testSuite.getTestCases()) {
 			
 			List<TestCase> combineTestCase = new ArrayList<TestCase>();
 			
-			combineTestCase.addAll(testSuite.getBeforeEachTest());
-			combineTestCase.add(testCase);
-			combineTestCase.addAll(testSuite.getAfterEachTest());
-			
+			combineTestCase.add(testCase);		
 				
 			final TestSuite minisuite = new TestSuite(); 
 			minisuite.addTestCases(combineTestCase);
-			this.extractHooks(minisuite);
+			minisuite.setSuitName(testSuite.getSuiteName());
+			minisuite.createTestSuiteNode(testSuite.getTestSuiteNode());
 			
 			// create parallel runner here.
-			executor.submit(() -> runTestSuite(minisuite, suiteNode, browserDetails));
+			executor.submit(() -> runTestSuite(minisuite, browserDetails));
 	
 		}
 
@@ -152,68 +149,24 @@ public class RunTests {
 		    }
 		} catch (InterruptedException e) {
 		    executor.shutdownNow();
+		    e.printStackTrace();
 		    Thread.currentThread().interrupt();
 		}
 
 	}
 	
-	private void runTestSuite(TestSuite testSuite, ExtentTest suiteNode, BrowserConfig browserDetails) {
-		
-	//	flag = this.runListOfTestCases(beforeAllTests.getTestCases());
-		boolean flag =true;
-			
+	private void runTestSuite(TestSuite testSuite, BrowserConfig browserDetails) {
+				
 			for (TestCase testCase : testSuite.getTestCases()) {
-			ExtentTest caseNode = suiteNode.createNode(testCase.getTestCaseId());
-				Optional<BrowserConfig> deviceConfig = Optional.ofNullable(browserDetails);
+			
+				BrowserConfig deviceConfig = browserDetails;
 				ExecuteStep ex = new ExecuteStep(deviceConfig);
+				report[browserDetails.getBrowserSerialNumber()].fireAddTestCaseEvent(testCase, testSuite);
 				
-				
-				if (flag) {
-					
-					flag = this.runListOfTestCases(testSuite.getBeforeEachTest(), caseNode, ex);
-					
-				} else {
-					// code to skip beforeEachTestCases here
-					testSuite.getBeforeEachTest().forEach(tc -> {
-						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeEach, afterEach) failure >>");
-					});
-				}
-
-				if (flag) {
-					this.runTestCase(testCase, caseNode, ex);
-				} else {
-					this.skipTestCase(testCase, caseNode, "<< skipping tests due to Hook (beforeEach, afterEach) failure >>");
-				}
-
-				if (flag) {
-					flag = this.runListOfTestCases(testSuite.getAfterEachTest(), caseNode, ex);
-
-				} else {
-					// skip afterEachTestCases here
-					testSuite.getAfterEachTest().forEach(tc -> {
-						this.skipTestCase(tc, caseNode, "<< skipping tests due to Hook (beforeEach, afterEach) failure >>");
-					});
-				}
+					this.runTestCase(testCase, ex);
+			
 				this.cleanUp(ex);
-				//set reliability of hook test to true if test passes even once successfully. 
-				if(testCase.hasTestCasePassed() && !testSuite.isHookTestReliable()) {
-					testSuite.setHookTestReliablity();
 				}
-				//resets hook status if test case hasn't passed and test hooks are reliable
-				if(!testCase.hasTestCasePassed() && testSuite.isHookTestReliable()) {
-					testSuite.resetHookTestStatus();
-					flag = true;
-				}
-			}
-
-//		if (flag) {
-//			flag = this.runListOfTestCases(testSuite.getAfterAllTests());
-//		} else {
-//			afterAllTests.getTestCases().forEach(tc -> {
-//				this.skipTestCase(tc,
-//						"<< skipping tests due to Hook (beforeAll, afterAll, beforeEach, afterEach) failure >>");
-//			});
-//		}
 	}
 	
 	private void cleanUp(ExecuteStep ex) {
@@ -221,16 +174,18 @@ public class RunTests {
 	}
 
 
-	private void runTestCase(TestCase testCase, ExtentTest testCaseNode, ExecuteStep ex) {
+	private void runTestCase(TestCase testCase, ExecuteStep ex) {
 		Instant start = Instant.now();
 
 		Iterator<TestStep> it = testCase.getSteps().iterator();
 		while (it.hasNext()) {
 			TestStep ts = it.next();
+			report[ex.browserConfig.getBrowserSerialNumber()].fireAddTestStepEvent(ts, testCase);
 			if (testCase.getTestCaseResult().isFailed()) {
-				this.skipStep(ts,testCaseNode ,">> Skipped because of error in " + testCase.getTestCaseId() + " <<");
+				ts.setFailureReason(">> Skipped because of error in " + testCase.getTestCaseId() + " <<");
+				this.skipStep(ts, ex.browserConfig);
 			} else {
-				runTestStep(ts, testCaseNode, ex);
+				runTestStep(ts, ex);
 
 				if (ts.getResult().isFailed()) {
 					testCase.setTestCaseResult(ts.getResult().setStatusTo());
@@ -249,38 +204,27 @@ public class RunTests {
 	}
 
 	
-	private void skipTestCase(TestCase testCase, ExtentTest testCaseNode, String reason) {
+	@SuppressWarnings("unused")
+	private void skipTestCase(TestCase testCase, BrowserConfig browserConfig, String reason) {
 		testCase.getSteps().forEach(step -> {
-			this.skipStep(step, testCaseNode, reason);
+			step.setResult(TestStatus.PENDING, reason);
+			this.skipStep(step, browserConfig);
 		});
 
 	}
-
-	private boolean runListOfTestCases(List<TestCase> listOfTestCases, ExtentTest testCaseNode, ExecuteStep ex) {
-		boolean result = true;
-		
-		for(TestCase testCase : listOfTestCases) {
-			this.runTestCase(testCase,testCaseNode,ex);
-			result = testCase.getTestCaseResult().isPassed(); // returns true if test is passed
-		}
-		
-		return result;
-	}
-
 	
-	private void skipStep(TestStep testStep, ExtentTest testCaseNode ,String reason) {
-		ExtentTest stepNode = testCaseNode
-				.createNode(testStep.getStepDescription());
-		stepNode.skip(reason);
+	private void skipStep(TestStep testStep ,BrowserConfig browserConfig) {
+		report[browserConfig.getBrowserSerialNumber()].fireSetTestStepStatus(testStep);
 	}
 
-	private void runTestStep(TestStep testStep, ExtentTest testCaseNode, ExecuteStep ex) {
+	private void runTestStep(TestStep testStep, ExecuteStep ex) {
 
 		String action = testStep.getAction() == null ? "" : testStep.getAction() ;
 		String locator = testStep.getLocator() == null ? "" : testStep.getLocator() ;
 		String testData = testStep.getTestData() == null ? "" : testStep.getTestData() ;
 
-		ExtentTest stepNode = testCaseNode.createNode(testStep.getStepDescription());
+		//ExtentTest stepNode = testCaseNode.createNode(testStep.getStepDescription());
+		
 
 		if (locator.length() == 0 && testData.length() == 0) {
 			ex.executeStep(action);
@@ -294,24 +238,14 @@ public class RunTests {
 			// Log error in logs here with step details like action, locator and testData
 			testStep.setResult(TestStatus.INVALID, "Something missed by compiler\n<<-Didn't find a proper match->>\n");
 		}
-		System.out.println(
-				"Executing : " + testStep.getStepDescription() + "\t" + ex.result + "\n" + ex.reason);
-
-		if (ex.result == TestStatus.PASSED) {
-			testStep.setResult(TestStatus.PASSED);
-			stepNode.pass(ex.reason);
-		} else {
-
+		if(testStep.getResult()!= TestStatus.INVALID) {
+//			System.out.println(
+//			"Executing : " + testStep.getStepDescription() + "\t" + ex.result + "\n" + ex.reason);
 			testStep.setResult(ex.result, ex.reason);
-			stepNode.fail("Step : " + ex.reason, ex.screenshot);
+			testStep.attachScreenshot(ex.screenshot);
 		}
+		
+		report[ex.browserConfig.getBrowserSerialNumber()].fireSetTestStepStatus(testStep);
 	}
 	
-	private void extractHooks(TestSuite testSuite) {
-		testSuite.extractAfterAllMethodFromTestSuite();
-		testSuite.extractAfterEachMethodFromTestSuite();
-		testSuite.extractBeforeAllMethodFromTestSuite();
-		testSuite.extractBeforeEachMethodFromTestSuite();
-
-	}
 }
