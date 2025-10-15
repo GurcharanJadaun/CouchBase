@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.aventstack.extentreports.ExtentReports;
-
 import testListener.TestListener;
 import testManager.TestCase;
-import testManager.TestStatus;
 import testManager.TestStep;
 import testManager.TestSuite;
 

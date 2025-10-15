@@ -8,19 +8,22 @@
 				"BrowserName": "Chrome",
 				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
-				"HeadlessBrowser" : "true"
+				"HeadlessBrowser" : "true",
+				"RetryFailedTestCases" : "true"
 			},
 			{
 				"BrowserName": "Firefox",
 				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
-				"HeadlessBrowser" : "true"
+				"HeadlessBrowser" : "true",
+				"RetryFailedTestCases" : "true"
 			},
 			{
 				"BrowserName": "Safari",
 				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
-				"HeadlessBrowser" : "true"
+				"HeadlessBrowser" : "true",
+				"RetryFailedTestCases" : "false"
 			}
 		]
 	}
@@ -32,10 +35,10 @@
 		"TargetOperatingSystem": "MAC",
 		"TargetBrowsers": [
 			{
-				"BrowserName": "Safari",
+				"BrowserName": "Chrome",
 				"ParallelTestExecution": "true",
 				"NumberOfTests":"5",
-				"HeadlessBrowser" : "true"
+				"HeadlessBrowser" : "false"
 			}
 		]
 	}
