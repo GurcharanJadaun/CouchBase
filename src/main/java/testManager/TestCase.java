@@ -1,6 +1,7 @@
 package testManager;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import com.aventstack.extentreports.ExtentTest;
@@ -10,10 +11,12 @@ public class TestCase {
 	List<TestStep> steps = new ArrayList<TestStep>();
 	TestStatus result;
 	ExtentTest caseNode;
+	HashSet<String> tags = new HashSet<String>();
 
 	public TestCase() {
 		result = TestStatus.PENDING;
 		reason = "";
+		tags.add("@Regression");
 	}
 
 	public TestCase(TestCase tc) {
@@ -25,9 +28,11 @@ public class TestCase {
 		}
 		this.testCaseId = tc.testCaseId;
 		this.caseNode = null;
+		this.tags = tc.tags;
 
 	}
 
+	
 	/**
 	 * Sets the test case ID for this test case.
 	 *
@@ -162,6 +167,14 @@ public class TestCase {
 	 */
 	public void createTestCaseNode(ExtentTest caseNode) {
 	    this.caseNode = caseNode;
+	}
+	
+	public void addTag(String tag) {
+		this.tags.add(tag);
+	}
+	
+	public HashSet<String> getTestCaseTags(){
+		return this.tags;
 	}
 
 }

@@ -32,19 +32,25 @@ public class RunTests {
 		TestSuiteLoader loadTests= new TestSuiteLoader();
 		String urlConfig = System.getProperty("testEnv","Product");
 		String deviceConfig = System.getProperty("deviceConfig","TestRunner");
+		String testCaseTags = System.getProperty("testCaseTags","@Regression");
+		String testPlanTags = System.getProperty("testPlanTags","@Debug");
 		
-		loadTests.setupTest();
+		
+		loadTests.setupTest(testPlanTags);
 		
 		TestEnvironmentConfig testEnvConfig= new TestEnvironmentConfig("TestURLConfig");
 		JSONObject urlDetails= testEnvConfig.getTestEnvConfigFromJson(urlConfig);
 		DeviceManager device = new DeviceManager("DeviceConfig");
 		device.setupBrowserForDevice(deviceConfig,urlDetails);
-		
+				
 		RunTests runner = new RunTests();
+		List<TestSuite> listOfTestSuites= loadTests.getListOfTestSuite(testCaseTags);
+		
 		if(device.runTestsOnBrowsersInParallel()) {
-		runner.testBrowsersInParallel(device, loadTests.listOfTestSuites);}
+		runner.testBrowsersInParallel(device, listOfTestSuites);
+			}
 		else {
-		runner.testBrowsersSequentially(device, loadTests.listOfTestSuites);	
+		runner.testBrowsersSequentially(device, listOfTestSuites);	
 		}
 			
 		Instant end = Instant.now();
@@ -59,7 +65,6 @@ public class RunTests {
 	
 	public void testBrowsersSequentially(DeviceManager device, List<TestSuite> testSuites) {
 		report = new ReportTestEventManager[device.getBrowserList().size()];
-		System.out.println("Number of suites to run  : " + testSuites.size());
 		
 		device.getBrowserList().forEach(browser -> {
 			report[browser.getBrowserSerialNumber()] = new ReportTestEventManager();
@@ -77,7 +82,6 @@ public class RunTests {
 		int numberOfThreads = device.getBrowserList().size();
 		ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
 		report = new ReportTestEventManager[device.getBrowserList().size()];
-		System.out.println("Number of suites to run  : " + testSuites.size());
 		
 		for (BrowserConfig browser : device.getBrowserList()) {
 			report[browser.getBrowserSerialNumber()] = new ReportTestEventManager();
@@ -106,13 +110,9 @@ public class RunTests {
 	
 	public void testSuiteSequential(List<TestSuite> testSuites, BrowserConfig browser) {
 		for(TestSuite testSuite : testSuites) {
-			TestSuite suite = (new TestSuite(testSuite));
-		
-		System.out.println("---------" + browser.getBrowserName() + "----------");
+	
+		TestSuite suite = (new TestSuite(testSuite));
 		report[browser.getBrowserSerialNumber()].fireCreateTestSuite(suite);
-		
-		suite.extractHooks();
-		suite.addHooksToTestCases();
 		
 		if(browser.runTestsInParallel()) {
 		this.testCaseInParallel(suite,browser);}
@@ -164,11 +164,7 @@ public class RunTests {
 				report[browserDetails.getBrowserSerialNumber()].fireAddTestCaseEvent(testCase, testSuite);
 				
 				this.runTestCase(testCase, ex);
-				
-				System.out.println("Test Case Status  : "+testCase.getTestCaseResult());
-				System.out.println("Test Case result  : "+testCase.getTestCaseResult().isFailed());
-				System.out.println("Test case retry   : "+browserDetails.retryFailedTestCase());
-				
+					
 				if(testCase.getTestCaseResult().isFailed() && browserDetails.retryFailedTestCase()) {
 					System.out.println("<< Retrying failed test case >>");
 					this.cleanUp(ex);
@@ -216,7 +212,7 @@ public class RunTests {
 		Instant end = Instant.now();
 		Duration timeElapsed = Duration.between(start, end);
 
-		System.out.println("Executing : " + testCase.getTestCaseId() + "\t" + testCase.getTestCaseResult() + "\t"
+		System.out.println("Executing : " +ex.browserConfig.getBrowserName()+"\t"+ testCase.getTestCaseId() + "\t" + testCase.getTestCaseResult() + "\t"
 				+ timeElapsed.toSeconds() + "\t" + testCase.getTestCaseReason());
 	}
 
@@ -256,7 +252,6 @@ public class RunTests {
 			testStep.setResult(TestStatus.INVALID, "Something missed by compiler\n<<-Didn't find a proper match->>\n");
 		}
 		if(testStep.getResult()!= TestStatus.INVALID) {
-//			System.out.println(
 //			"Executing : " + testStep.getStepDescription() + "\t" + ex.result + "\n" + ex.reason);
 			testStep.setResult(ex.result, ex.reason);
 			testStep.attachScreenshot(ex.screenshot);

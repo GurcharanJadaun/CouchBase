@@ -25,7 +25,7 @@ import testManager.TestSuite;
 
 public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSuite {
 
-	public List<TestSuite> listOfTestSuites;
+	protected List<TestSuite> listOfTestSuites;
 	private Sheet sheet;
 	String pathSep, dir;
 
@@ -34,7 +34,7 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 		listOfTestSuites = new ArrayList<TestSuite>();
 		dir = "src" + pathSep + "main" + pathSep + "resources" + pathSep + "FeatureFiles";
 	}
-
+	
 	public void generateTestSuite() {
 
 		XlsxFileManager fileManager = new XlsxFileManager();
@@ -57,6 +57,34 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 			if(item.getValue().equalsIgnoreCase("y")) {
 				this.loopOverTestSuites(item.getKey());
 			}
+		}
+	}
+	
+	public void generateSuiteFromTestPlan(String tags) {
+		XlsxFileManager fileManager = new XlsxFileManager();
+		
+		sheet = fileManager.getFirstExcelSheet("TestPlan.xlsx");
+		
+		JSONArray testPlan = fileManager.excelSheetToJsonArray(sheet);
+		
+		for(int i=0;i<testPlan.length();i++) {
+			JSONObject planRow = testPlan.getJSONObject(i);
+			boolean flag = false;
+			String testSuiteName = planRow.get("Test Suite Name").toString();
+			
+			String[] testPlanTags = planRow.get("Tags").toString().split(",");
+			String[] executionTags = tags.split(",");
+			
+			for(String planTag: testPlanTags) {
+				for(String executionTag : executionTags) {
+					if(planTag.trim().equalsIgnoreCase(executionTag.trim())) {
+						flag = true;
+					}
+				}
+			}
+		if(flag) {
+				this.loopOverTestSuites(testSuiteName);}
+	
 		}
 	}
 
@@ -147,18 +175,18 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 	public List<TestCase> createListOfTestCases(JSONArray listOfSteps) {
 		List<TestCase> listOfTestCases = new ArrayList<TestCase>();
 		TestCase tc = null;
-		int stepNumber=1;
-		
-		for(int i=0; i<listOfSteps.length(); i++) {
+		int stepNumber = 1;
+
+		for (int i = 0; i < listOfSteps.length(); i++) {
 			TestStep ts = new TestStep();
-			
+
 			String testCaseId = listOfSteps.getJSONObject(i).get("Test Case Id").toString();
+			String tags = listOfSteps.getJSONObject(i).get("Tags").toString();
 			String action = listOfSteps.getJSONObject(i).get("Action").toString();
 			String locator = listOfSteps.getJSONObject(i).get("Locator").toString();
 			String testData = listOfSteps.getJSONObject(i).get("Test Data").toString();
-			
-			
-			if(testCaseId.length()>0) {
+
+			if (testCaseId.length() > 0) {
 				if (tc != null) {
 					listOfTestCases.add(tc);
 				}
@@ -166,22 +194,30 @@ public class XlsxDataExtractor extends TestCaseCompiler implements CreateTestSui
 				stepNumber = 1;
 				tc = new TestCase();
 				tc.insertTestCaseId(testCaseId);
+				if (tags.length() != 0) {
+					String[] arrOfTags = tags.split(",");
+						for (String tag : arrOfTags) {
+							tc.addTag(tag.trim());
+					}
+				}
 
 			}
-			
-			if(action.length() > 0){
-				
+
+			if (action.length() > 0) {
+
 				ts.insertAction(action);
 				ts.insertLocator(Optional.ofNullable(locator));
 				ts.insertTestData(Optional.ofNullable(testData));
 				ts.setStepNumber(stepNumber);
-				
+
 				tc.addSteps(ts);
 				stepNumber++;
 			}
 		}
-		
+
 		listOfTestCases.add(tc);
+		
+		
 
 		return listOfTestCases;
 

@@ -232,6 +232,7 @@ public class TestSuite {
 			tmp.reason = testCase.reason;
 			tmp.result = testCase.result;
 			tmp.testCaseId = testCase.testCaseId;
+			tmp.tags = testCase.tags;
 
 			tmp.addSteps(this.beforeEachTest.steps);
 			tmp.addSteps(testCase.steps);
@@ -259,6 +260,17 @@ public class TestSuite {
 		this.extractAfterEachMethodFromTestSuite();
 		this.extractBeforeEachMethodFromTestSuite();
 
+	}
+	
+	public void filterByTags(String tag) {
+		
+		for(TestCase tc : this.testSuite ) {
+			System.out.println("Tags for "+tc.getTestCaseId()+" : "+tc.getTestCaseTags());
+			if(!tc.getTestCaseTags().contains(tag)) {
+				tc.setTestCaseResult(TestStatus.INVALID);
+			}
+		}
+		this.removeInvalidTestCasesFromSuite();
 	}
 
 }
