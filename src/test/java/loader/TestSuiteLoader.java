@@ -1,9 +1,10 @@
 package loader;
 
 import java.io.File;
+import java.util.List;
 
 import dataExtractor.XlsxDataExtractor;
-import deviceConfiguration.DeviceManager;
+import testManager.TestSuite;
 import utilities.CleanupManager;
 
 public class TestSuiteLoader extends XlsxDataExtractor {
@@ -17,14 +18,24 @@ public class TestSuiteLoader extends XlsxDataExtractor {
 	}
 	
 	
-	public void setupTest() {
+	public void setupTest(String testPlanTags) {
 		CleanupManager clean = new CleanupManager();
 		
 		clean.flush();
 		
 		this.loadLocatorMap(locatorDir);
 		this.loadFunctionNames(keywordDir);
-		this.generateSuiteFromTestPlan();
+		this.generateSuiteFromTestPlan(testPlanTags);
 		this.generateCompilationReport(listOfTestSuites);
+	}
+	
+	public List<TestSuite> getListOfTestSuite(String tags){
+		for(TestSuite suite : this.listOfTestSuites) {
+			suite.extractHooks();
+			suite.addHooksToTestCases();
+			suite.filterByTags(tags);
+			System.out.println("test cases to be executed : "+suite.getTestCases().size());
+		}
+		return this.listOfTestSuites;
 	}
 }

@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
-
 import testListener.TestListener;
 import testManager.TestCase;
 import testManager.TestStatus;
@@ -22,7 +21,6 @@ public class ReportTestListener implements TestListener {
 	public void addTestSuite(TestSuite testSuite) {
 		ExtentTest node = this.report.createTest(testSuite.getSuiteName());
 		testSuite.createTestSuiteNode(node);
-		
 	}
 	
 	@Override
