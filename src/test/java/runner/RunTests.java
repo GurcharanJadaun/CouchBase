@@ -176,6 +176,8 @@ public class RunTests {
 					
 					ex = new ExecuteStep(deviceConfig);
 					this.runTestCase(retryTestCase, ex);
+					
+					report[browserDetails.getBrowserSerialNumber()].fireRemoveTestCase(testSuite, testCase);
 				}
 			
 				this.cleanUp(ex);
@@ -232,31 +234,44 @@ public class RunTests {
 
 	private void runTestStep(TestStep testStep, ExecuteStep ex) {
 
-		String action = testStep.getAction() == null ? "" : testStep.getAction() ;
-		String locator = testStep.getLocator() == null ? "" : testStep.getLocator() ;
-		String testData = testStep.getTestData() == null ? "" : testStep.getTestData() ;
+		String action = testStep.getAction() == null ? "" : testStep.getAction();
+		String locator = testStep.getLocator() == null ? "" : testStep.getLocator();
+		String testData = testStep.getTestData() == null ? "" : testStep.getTestData();
 
-		//ExtentTest stepNode = testCaseNode.createNode(testStep.getStepDescription());
-		
+		long start = System.currentTimeMillis();
+		boolean condition = true;
 
-		if (locator.length() == 0 && testData.length() == 0) {
-			ex.executeStep(action);
-		} else if (locator.length() == 0 && testData.length() != 0) {
-			ex.executeStep(action, testData);
-		} else if (locator.length() != 0 && testData.length() == 0) {
-			ex.executeStep(action, locator);
-		} else if (locator.length() != 0 && testData.length() != 0) {
-			ex.executeStep(action, locator, testData);
-		} else {
-			// Log error in logs here with step details like action, locator and testData
-			testStep.setResult(TestStatus.INVALID, "Something missed by compiler\n<<-Didn't find a proper match->>\n");
-		}
-		if(testStep.getResult()!= TestStatus.INVALID) {
-//			"Executing : " + testStep.getStepDescription() + "\t" + ex.result + "\n" + ex.reason);
-			testStep.setResult(ex.result, ex.reason);
-			testStep.attachScreenshot(ex.screenshot);
-		}
-		
+		do {
+			if (locator.length() == 0 && testData.length() == 0) {
+				ex.executeStep(action);
+			} else if (locator.length() == 0 && testData.length() != 0) {
+				ex.executeStep(action, testData);
+			} else if (locator.length() != 0 && testData.length() == 0) {
+				ex.executeStep(action, locator);
+			} else if (locator.length() != 0 && testData.length() != 0) {
+				ex.executeStep(action, locator, testData);
+			} else {
+				// Log error in logs here with step details like action, locator and testData
+				ex.result = TestStatus.INVALID;
+				ex.reason = "Something missed by compiler\n<<-Didn't find a proper match->>\n";
+			}
+			condition = (ex.result != TestStatus.INVALID) && ex.result.isFailed() && (System.currentTimeMillis() - start) < 3000;
+			if (condition) {
+				try {
+						ex.flush();
+						Thread.sleep(500);
+						System.out.println("Retyring Step : "+ testStep.getStepDescription());
+						
+				} catch (Exception exception) {
+
+				}
+			}
+
+		} while (condition);
+
+		testStep.setResult(ex.result, ex.reason);
+		testStep.attachScreenshot(ex.screenshot);
+
 		report[ex.browserConfig.getBrowserSerialNumber()].fireSetTestStepStatus(testStep);
 	}
 	

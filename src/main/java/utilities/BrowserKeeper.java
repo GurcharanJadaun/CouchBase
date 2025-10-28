@@ -3,6 +3,7 @@ package utilities;
 import java.util.Arrays;
 
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.Locator.IsVisibleOptions;
 import com.microsoft.playwright.options.HttpCredentials;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.SelectOption;
@@ -25,7 +26,6 @@ public class BrowserKeeper {
 	
 
 
-	@SuppressWarnings("unused")
 	public void initiateBrowser(String browserName) {
 		playwright = Playwright.create();
 		BrowserContext context = null;
@@ -110,7 +110,6 @@ public class BrowserKeeper {
 
 	public boolean isElementAbsentInDom(String locator) {
 		Locator ele = page.locator(locator);
-		System.out.println("-->" + ele.count());
 		return ele.count() == 0;
 	}
 
@@ -220,5 +219,5 @@ public class BrowserKeeper {
 		}
 		return screenShot;
 	}
-
+	
 }

@@ -265,7 +265,6 @@ public class TestSuite {
 	public void filterByTags(String tag) {
 		
 		for(TestCase tc : this.testSuite ) {
-			System.out.println("Tags for "+tc.getTestCaseId()+" : "+tc.getTestCaseTags());
 			if(!tc.getTestCaseTags().contains(tag)) {
 				tc.setTestCaseResult(TestStatus.INVALID);
 			}
